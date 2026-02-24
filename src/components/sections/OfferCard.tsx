@@ -28,13 +28,13 @@ export function OfferCard({ cta }: OfferCardProps) {
           <p className="text-base font-medium tracking-widest uppercase">
             <span className="text-secondary-300">Save 90%</span>
             {" — "}
-            <span className="from-primary-200 to-primary-300 bg-linear-to-br bg-clip-text text-transparent">
+            <span className="text-primary-300">
               Limited Time Offer
             </span>
           </p>
           <h2>
             Get Started for{" "}
-            <span className="from-primary-200 to-primary-300 bg-linear-to-br bg-clip-text text-transparent">
+            <span className="text-primary-300">
               $100/mo
             </span>
           </h2>

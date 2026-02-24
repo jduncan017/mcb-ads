@@ -87,16 +87,14 @@ export default function TeamsPage() {
 
       {/* Hero */}
       <Hero
-        tagline="For Production Teams"
+        tagline="For Film & TV Studios"
         heading={
           <>
             One Subscription Replaces{" "}
-            <span className="from-primary-200 to-primary-300 bg-linear-to-br bg-clip-text text-transparent">
-              4+ Tools
-            </span>
+            <span className="text-primary-300">4+ Tools</span>
           </>
         }
-        description="AI automation that turns days of manual pre-production into hours. Breakdowns, scheduling, budgeting, storyboards, and video — all connected to your screenplay."
+        description="Stop juggling separate apps for scripts, breakdowns, schedules, budgets, and AI. FinalBit turns days of manual pre-production into hours — with everything connected in one workspace."
         screenshotDescription="Team workspace showing collaborative breakdown, shared schedule, and real-time budget tracking"
         cta={
           <>
@@ -114,6 +112,7 @@ export default function TeamsPage() {
             </CalModalTrigger>
           </>
         }
+        image="/product/script-upload.png"
       />
 
       {/* Pain Points — Before / After */}
@@ -121,7 +120,9 @@ export default function TeamsPage() {
       <section className="section-pad relative overflow-hidden bg-black/20">
         <div className="relative mx-auto max-w-[1200px]">
           <FadeIn>
-            <Eyebrow className="mb-3 text-center">The Problem</Eyebrow>
+            <Eyebrow className="mb-3 text-center">
+              Too Many Tools, Not Enough Time
+            </Eyebrow>
             <h2 className="mb-10 text-center">
               Stop Juggling Disconnected Tools
             </h2>
@@ -167,7 +168,7 @@ export default function TeamsPage() {
       </section>
 
       {/* Full Product View */}
-      <ProductShowcase />
+      <ProductShowcase image="/product/pitch-deck.png" />
 
       {/* Social Proof */}
       <div className="SocialProofWrapper mb-16 md:mb-40">

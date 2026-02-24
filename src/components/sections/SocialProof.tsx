@@ -2,8 +2,8 @@ import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 
 const stats = [
-  { value: "2,400+", label: "Filmmakers" },
-  { value: "15,000+", label: "Scripts Analyzed" },
+  { value: "45,000+", label: "Filmmakers" },
+  { value: "70,000+", label: "Scripts Analyzed" },
   { value: "90%", label: "Time Saved" },
   { value: "4.9/5", label: "Rating" },
 ];

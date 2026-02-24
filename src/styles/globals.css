@@ -257,7 +257,7 @@
     animation: product-tilt-center 0.8s ease-out 0.3s both;
   }
   /* Mobile: slide in from sides without rotateY */
-  @media (max-width: 767px) {
+  @media (max-width: 1024px) {
     .product-tilt-right {
       animation-name: product-slide-right-mobile;
     }
@@ -277,14 +277,9 @@
   .section-pad {
     padding: 2.5rem 1.25rem; /* 40px 20px — mobile */
   }
-  @media (min-width: 768px) {
-    .section-pad {
-      padding: 5rem 4rem; /* 80px 64px — tablet */
-    }
-  }
   @media (min-width: 1024px) {
     .section-pad {
-      padding: 7.5rem 5rem; /* 120px 80px — desktop */
+      padding: 5rem 4rem; /* 80px 64px — tablet */
     }
   }
 

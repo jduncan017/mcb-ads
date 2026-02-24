@@ -86,7 +86,7 @@ export default function SoloPage() {
         heading={
           <>
             Upload Your Screenplay.{" "}
-            <span className="from-primary-200 to-primary-300 bg-linear-to-br bg-clip-text text-transparent">
+            <span className="text-primary-300">
               Get a Full Breakdown in Minutes.
             </span>
           </>
@@ -104,13 +104,14 @@ export default function SoloPage() {
             Try It Free
           </Button>
         }
+        image="/product/script-upload.png"
       />
 
       {/* Full Product View */}
-      <ProductShowcase image="/product/projects.png" />
+      <ProductShowcase image="/product/pitch-deck.png" />
 
       {/* Social Proof */}
-      <div className="SocialProofWrapper pb-16 md:pb-40">
+      <div className="SocialProofWrapper px-6 pb-16 md:pb-40">
         <SocialProof />
       </div>
 
@@ -166,7 +167,7 @@ export default function SoloPage() {
         <div className="relative mx-auto flex max-w-[1200px] flex-col items-center gap-10 md:flex-row md:gap-16">
           <FadeIn delay={200} className="flex min-w-0 flex-1 items-center">
             <ProductImage
-              src="/product/schedules.png"
+              src="/product/schedules-1.png"
               alt="FinalBit product interface showing script breakdown and scheduling"
               direction="left"
             />

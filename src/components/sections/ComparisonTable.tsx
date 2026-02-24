@@ -3,9 +3,9 @@ import { FadeIn } from "~/components/FadeIn";
 
 const competitors = [
   "FinalBit",
-  "Film U.",
+  "Filmustage",
   "Rivet AI",
-  "Studio B.",
+  "StudioBinder",
   "Yamdu",
   "Final Draft",
 ] as const;
@@ -88,7 +88,7 @@ export function ComparisonTable() {
                 {competitors.map((c, i) => (
                   <th
                     key={c}
-                    className={`px-5 py-4 text-center text-lg font-semibold ${i === 0 ? "bg-linear-to-br from-primary-200 to-primary-300 bg-clip-text text-transparent" : "text-neutral-200"}`}
+                    className={`px-5 py-4 text-center text-lg font-semibold ${i === 0 ? "text-primary-300" : "text-neutral-200"}`}
                   >
                     {c}
                   </th>

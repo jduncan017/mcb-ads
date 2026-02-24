@@ -46,7 +46,7 @@ export default function LandingPage() {
             <h1>
               Script to Screen.
               <br />
-              <span className="from-primary-200 to-primary-300 bg-linear-to-br bg-clip-text text-transparent">
+              <span className="text-primary-300">
                 Hours, Not Weeks.
               </span>
             </h1>

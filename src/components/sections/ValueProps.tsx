@@ -45,7 +45,7 @@ export function ValueProps() {
           </h2>
         </FadeIn>
       </div>
-      <div className="mx-auto max-w-[1200px] space-y-20 md:space-y-40">
+      <div className="mx-auto max-w-[1200px] space-y-16 md:space-y-40">
         {rows.map((row, i) => {
           const imageOnRight = i % 2 === 0;
           return (
@@ -57,23 +57,21 @@ export function ValueProps() {
               >
                 {/* Copy */}
                 <div className="flex max-w-[480px] flex-1 flex-col items-start gap-4 px-4 md:px-0">
-                  <div className="Header flex items-center gap-4">
+                  <div className="Header flex w-full items-center gap-4">
                     <div className="hidden md:block">
                       <IconBubble size="sm">{row.icon}</IconBubble>
                     </div>
-                    <h2>{row.heading}</h2>
+                    <h2 className="w-full text-center md:text-start">
+                      {row.heading}
+                    </h2>
                   </div>
-                  <p className="text-neutral-200">{row.description}</p>
+                  <p className="text-center text-neutral-200 md:text-start">
+                    {row.description}
+                  </p>
                 </div>
 
                 {/* Product shot — bleeds off-screen on mobile */}
-                <div
-                  className={`w-full flex-1 md:mx-0 ${
-                    imageOnRight
-                      ? "-mr-5 md:mr-0"
-                      : "-ml-5 md:ml-0"
-                  }`}
-                >
+                <div className="w-full flex-1 px-2 md:mx-0">
                   <ProductImage
                     src={row.image}
                     alt={row.shotAlt}
