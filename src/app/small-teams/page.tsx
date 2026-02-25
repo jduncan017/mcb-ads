@@ -6,6 +6,7 @@ import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 import { ProductImage } from "~/components/ProductImage";
 import { Navbar, Footer } from "~/components/layout";
+const signupUrl = "https://www.finalbitai.com/login?t=signup";
 import {
   Hero,
   ProductShowcase,
@@ -73,7 +74,7 @@ export default function SoloPage() {
       <Navbar
         sticky
         cta={
-          <Button as="a" href="#signup" arrow>
+          <Button as="a" href={signupUrl} arrow>
             Start Free
           </Button>
         }
@@ -96,7 +97,7 @@ export default function SoloPage() {
         cta={
           <Button
             as="a"
-            href="#signup"
+            href={signupUrl}
             size="lg"
             arrow
             className="glow-cta shadow-theme"
@@ -182,7 +183,7 @@ export default function SoloPage() {
             <div className="mt-4 w-full max-w-[520px] md:w-auto">
               <Button
                 as="a"
-                href="https://finalbit.com"
+                href={signupUrl}
                 size="lg"
                 arrow
                 className="glow-cta shadow-theme w-full md:w-auto"

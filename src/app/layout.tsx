@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { type Metadata } from "next";
 import { bodyFont, headingFont, monoFont } from "~/fonts";
 import { PostHogProvider } from "~/components/PostHogProvider";
+import { CalEmbed } from "~/components/CalEmbed";
 
 export const metadata: Metadata = {
   title: "FinalBit — AI-Powered Pre-Production",
@@ -29,6 +30,7 @@ export default function RootLayout({
             </div>
           </PostHogProvider>
         </Suspense>
+        <CalEmbed />
       </body>
     </html>
   );

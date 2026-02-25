@@ -1,8 +1,6 @@
-"use client";
-
 import { FadeIn } from "~/components/FadeIn";
 import { Button } from "~/components/Button";
-import { CalModalTrigger } from "~/components/CalModalTrigger";
+import { calAttrs } from "~/lib/cal";
 
 export function BottomCTA() {
   return (
@@ -22,17 +20,9 @@ export function BottomCTA() {
             <Button as="link" href="/small-teams" size="lg" className="glow-cta shadow-theme">
               Start Free
             </Button>
-            <CalModalTrigger>
-              {(openModal) => (
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={openModal}
-                >
-                  Book a Demo
-                </Button>
-              )}
-            </CalModalTrigger>
+            <Button variant="outline" size="lg" {...calAttrs}>
+              Book a Demo
+            </Button>
           </div>
         </FadeIn>
       </div>

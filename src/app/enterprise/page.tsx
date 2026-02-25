@@ -1,13 +1,11 @@
-"use client";
-
 import { Users, Sparkles, RefreshCcw, X, Check } from "lucide-react";
 import { Button } from "~/components/Button";
 import { IconBubble } from "~/components/IconBubble";
 import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
-import { CalModalTrigger } from "~/components/CalModalTrigger";
 import { Navbar, Footer } from "~/components/layout";
 import { OfferTicker } from "~/components/OfferTicker";
+import { calAttrs } from "~/lib/cal";
 import {
   Hero,
   FeatureGrid,
@@ -71,13 +69,9 @@ export default function TeamsPage() {
       <Navbar
         sticky
         cta={
-          <CalModalTrigger>
-            {(openModal) => (
-              <Button onClick={openModal} arrow>
-                Book a Demo
-              </Button>
-            )}
-          </CalModalTrigger>
+          <Button arrow {...calAttrs}>
+            Book a Demo
+          </Button>
         }
         className="bg-black/80 text-neutral-100 backdrop-blur-lg"
       />
@@ -97,20 +91,14 @@ export default function TeamsPage() {
         description="Stop juggling separate apps for scripts, breakdowns, schedules, budgets, and AI. FinalBit turns days of manual pre-production into hours — with everything connected in one workspace."
         screenshotDescription="Team workspace showing collaborative breakdown, shared schedule, and real-time budget tracking"
         cta={
-          <>
-            <CalModalTrigger>
-              {(openModal) => (
-                <Button
-                  onClick={openModal}
-                  size="lg"
-                  arrow
-                  className="glow-cta shadow-theme"
-                >
-                  See It in Action
-                </Button>
-              )}
-            </CalModalTrigger>
-          </>
+          <Button
+            size="lg"
+            arrow
+            className="glow-cta shadow-theme"
+            {...calAttrs}
+          >
+            See It in Action
+          </Button>
         }
         image="/product/script-upload.png"
       />
@@ -183,18 +171,14 @@ export default function TeamsPage() {
           subheading="Everything your crew needs, connected in one workspace."
           features={features}
           cta={
-            <CalModalTrigger>
-              {(openModal) => (
-                <Button
-                  onClick={openModal}
-                  size="lg"
-                  arrow
-                  className="glow-cta shadow-theme w-full md:w-auto"
-                >
-                  Schedule a Walkthrough
-                </Button>
-              )}
-            </CalModalTrigger>
+            <Button
+              size="lg"
+              arrow
+              className="glow-cta shadow-theme w-full md:w-auto"
+              {...calAttrs}
+            >
+              Schedule a Walkthrough
+            </Button>
           }
         />
       </div>
@@ -209,20 +193,14 @@ export default function TeamsPage() {
       <hr />
       <OfferCard
         cta={
-          <>
-            <CalModalTrigger>
-              {(openModal) => (
-                <Button
-                  onClick={openModal}
-                  size="lg"
-                  arrow
-                  className="glow-cta shadow-theme w-full md:w-auto"
-                >
-                  Claim This Offer
-                </Button>
-              )}
-            </CalModalTrigger>
-          </>
+          <Button
+            size="lg"
+            arrow
+            className="glow-cta shadow-theme w-full md:w-auto"
+            {...calAttrs}
+          >
+            Claim This Offer
+          </Button>
         }
       />
 

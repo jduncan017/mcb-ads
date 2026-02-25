@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { Button } from "~/components/Button";
 import { Wrapper } from "~/components/Wrapper";
 import { FadeIn } from "~/components/FadeIn";
+const signupUrl = "https://www.finalbitai.com/login?t=signup";
 
 interface PricingTier {
   name: string;
@@ -125,8 +126,8 @@ export function PricingCards() {
                 </ul>
                 <div className="mt-auto pt-6">
                   <Button
-                    as="link"
-                    href="#signup"
+                    as="a"
+                    href={signupUrl}
                     variant={tier.highlighted ? "primary" : "outline"}
                     size="md"
                     className={`w-full ${tier.highlighted ? "glow-cta" : ""}`}
