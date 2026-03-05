@@ -1,8 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import Script from "next/script";
+import { analytics } from "~/lib/analytics";
 
 export function CalEmbed() {
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      const el = (e.target as HTMLElement).closest("[data-cal-link]");
+      if (el) analytics.calModalOpened(window.location.pathname);
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
   return (
     <Script
       id="cal-embed"
