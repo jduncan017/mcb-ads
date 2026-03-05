@@ -10,7 +10,7 @@ interface OfferCardProps {
 }
 
 const perks = [
-  "1-on-1 onboarding call — we set up your script for you",
+  "Live script breakdown — we demo with your actual project",
   "12 seats — full team collaboration",
   "All Pro features, unlimited",
   "3 custom AI project setups per month",
@@ -39,8 +39,9 @@ export function OfferCard({ cta }: OfferCardProps) {
             </span>
           </h2>
           <p className="text-neutral-200">
-            Lock in 90% off your first month. Full team access, all Pro
-            features, and dedicated onboarding — cancel anytime.
+            Book a demo and lock in 90% off your first month. We&apos;ll
+            break down your script live and set up your workspace — no
+            commitment required.
           </p>
 
           <div className="mt-4 w-full max-w-[520px] md:w-auto">

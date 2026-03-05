@@ -88,7 +88,7 @@ export default function TeamsPage() {
             <span className="text-primary-300">4+ Tools</span>
           </>
         }
-        description="Stop juggling separate apps for scripts, breakdowns, schedules, budgets, and AI. FinalBit turns days of manual pre-production into hours — with everything connected in one workspace."
+        description="Stop juggling separate apps for scripts, breakdowns, schedules, budgets, and AI. FinalBit turns days of manual pre-production into hours — with everything connected in one workspace. Book a demo and we'll break down your script live so you can see exactly how it works for your project."
         screenshotDescription="Team workspace showing collaborative breakdown, shared schedule, and real-time budget tracking"
         cta={
           <Button
@@ -97,7 +97,7 @@ export default function TeamsPage() {
             className="glow-cta shadow-theme"
             {...calAttrs}
           >
-            See It in Action
+            Book a Live Demo
           </Button>
         }
         image="/product/script-upload.png"
@@ -177,7 +177,7 @@ export default function TeamsPage() {
               className="glow-cta shadow-theme w-full md:w-auto"
               {...calAttrs}
             >
-              Schedule a Walkthrough
+              Book a Demo
             </Button>
           }
         />
@@ -199,7 +199,7 @@ export default function TeamsPage() {
             className="glow-cta shadow-theme w-full md:w-auto"
             {...calAttrs}
           >
-            Claim This Offer
+            Book a Demo — Save 90%
           </Button>
         }
       />

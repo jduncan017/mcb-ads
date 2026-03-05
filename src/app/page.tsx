@@ -1,32 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
 import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 import { Navbar, Footer } from "~/components/layout";
 import { analytics } from "~/lib/analytics";
 
-const teamSizes = [
-  { value: "", label: "Select team size…" },
-  { value: "1", label: "Just me" },
-  { value: "2-3", label: "2–3 people" },
-  { value: "4-5", label: "4–5 people" },
-  { value: "6-10", label: "6–10 people" },
-  { value: "11-20", label: "11–20 people" },
-  { value: "20+", label: "20+ people" },
-];
-
-const TEAM_THRESHOLD = 4; // index in teamSizes where it tips to /enterprise
-
 export default function LandingPage() {
   const router = useRouter();
 
-  function handleSelect(value: string) {
-    if (!value) return;
-    const idx = teamSizes.findIndex((t) => t.value === value);
-    const destination = idx >= TEAM_THRESHOLD ? "enterprise" : "small-teams";
-    analytics.funnelRouted(value, destination);
+  function handlePath(category: "small-team" | "enterprise") {
+    const destination =
+      category === "enterprise" ? "enterprise" : "small-teams";
+    analytics.funnelRouted(category, destination);
     router.push(`/${destination}`);
   }
 
@@ -46,9 +32,7 @@ export default function LandingPage() {
             <h1>
               Script to Screen.
               <br />
-              <span className="text-primary-300">
-                Hours, Not Weeks.
-              </span>
+              <span className="text-primary-300">Hours, Not Weeks.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-lg text-neutral-200">
               Breakdowns, scheduling, budgets, storyboards, and video — one
@@ -57,35 +41,49 @@ export default function LandingPage() {
           </FadeIn>
 
           <FadeIn delay={200}>
-            <div className="border-primary-200/50 product-image-glow mx-auto mt-10 max-w-lg rounded-2xl border bg-blue-950/20 p-6 md:mt-16 md:p-10">
-              <label
-                htmlFor="team-size"
-                className="mb-6 block text-xl font-medium text-white md:mb-10 md:text-2xl"
-              >
-                How many people are on your production team?
-              </label>
-              <div className="relative">
-                <select
-                  id="team-size"
-                  onChange={(e) => handleSelect(e.target.value)}
-                  defaultValue=""
-                  className="shadow-theme border-primary-300 focus:ring-primary-200 w-full cursor-pointer appearance-none rounded-xl border-2 bg-white px-6 py-5 pr-14 text-xl text-neutral-400 transition focus:ring-2 focus:outline-none"
-                >
-                  {teamSizes.map((t) => (
-                    <option
-                      key={t.value}
-                      value={t.value}
-                      disabled={!t.value}
-                      className="bg-white text-neutral-400"
-                    >
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  className="text-primary-300 pointer-events-none absolute top-1/2 right-5 h-6 w-6 -translate-y-1/2"
-                  strokeWidth={2.5}
-                />
+            <div className="mx-auto mt-10 max-w-4xl md:mt-16">
+              <p className="mb-6 text-xl font-medium text-white md:mb-10 md:text-2xl">
+                What&apos;s your team size?
+              </p>
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Small Teams */}
+                <div className="flex flex-col items-center rounded-xl border border-gray-300/30 bg-linear-to-br from-gray-200/10 to-gray-600/10 px-6 pt-6 pb-16 text-center">
+                  {/* Spacer to match enterprise eyebrow height */}
+                  <div className="mb-6 h-5" />
+                  <h3 className="text-2xl font-semibold text-white">
+                    Filmmaker / Small Team
+                  </h3>
+                  <p className="mt-2 text-neutral-200/70">
+                    1–5 people. Start free and upgrade as you grow.
+                  </p>
+                  <button
+                    onClick={() => handlePath("small-team")}
+                    className="bg-primary-200/30 text-primary-100 hover:bg-primary-200 mt-10 inline-block cursor-pointer rounded-full px-6 py-4 text-lg font-semibold transition"
+                  >
+                    Explore Filmmaker Pricing &rarr;
+                  </button>
+                </div>
+
+                {/* Enterprise */}
+                <div className="border-primary-300/30 flex flex-col items-center rounded-xl border bg-linear-to-br from-gray-200/10 to-gray-600/10 px-6 pt-6 pb-16 text-left">
+                  <div className="bg-secondary-300/10 border-secondary-300/20 rounded-full border px-4 py-0.5">
+                    <span className="text-secondary-300 mb-3 text-xs font-semibold">
+                      90% Off First Month
+                    </span>
+                  </div>
+                  <h3 className="mt-3 text-2xl font-semibold text-white">
+                    Studio / Enterprise
+                  </h3>
+                  <p className="mt-2 text-neutral-200/70">
+                    6+ seats with dedicated onboarding.
+                  </p>
+                  <button
+                    onClick={() => handlePath("enterprise")}
+                    className="bg-primary-300 text-primary-100 hover:bg-primary-200 mt-10 inline-block cursor-pointer rounded-full px-6 py-4 text-lg font-semibold transition md:mt-auto"
+                  >
+                    Explore Studio Pricing &rarr;
+                  </button>
+                </div>
               </div>
             </div>
           </FadeIn>

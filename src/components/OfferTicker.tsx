@@ -1,6 +1,6 @@
 "use client";
 
-const message = "Limited offer — First month $100 (save 90%)";
+const message = "Enterprise offer — First month $100 (save 90%)";
 
 export function OfferTicker() {
   const items = Array.from({ length: 12 }, (_, i) => (

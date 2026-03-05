@@ -5,9 +5,9 @@ import { posthog } from "./posthog";
  * Call these from onClick handlers and form submissions.
  */
 export const analytics = {
-  /** User selected a team size on the landing page */
-  funnelRouted(teamSize: string, destination: "small-teams" | "enterprise") {
-    posthog.capture("funnel_routed", { team_size: teamSize, destination });
+  /** User selected a path on the landing page */
+  funnelRouted(category: "small-team" | "enterprise", destination: "small-teams" | "enterprise") {
+    posthog.capture("funnel_routed", { team_category: category, destination });
   },
 
   /** User clicked "Start Free" or submitted the email capture form */
