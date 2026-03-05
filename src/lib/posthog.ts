@@ -4,6 +4,9 @@ export function initPostHog() {
   if (typeof window === "undefined") return;
   if (posthog.__loaded) return;
 
+  // Skip tracking in development to keep PostHog data clean
+  if (process.env.NODE_ENV === "development") return;
+
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   if (!key) return; // PostHog disabled — no key configured
 

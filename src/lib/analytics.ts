@@ -20,7 +20,7 @@ export const analytics = {
     posthog.capture("demo_requested", data);
   },
 
-  /** User opened the Cal.com booking modal */
+  /** User clicked a button that opens the Cal.com booking embed */
   calModalOpened(source: string) {
     posthog.capture("cal_modal_opened", { source });
   },

@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 import { bodyFont, headingFont, monoFont } from "~/fonts";
 import { PostHogProvider } from "~/components/PostHogProvider";
 import { CalEmbed } from "~/components/CalEmbed";
+import { MetaPixel } from "~/components/MetaPixel";
 
 export const metadata: Metadata = {
   title: "FinalBit — AI-Powered Pre-Production",
@@ -22,6 +23,9 @@ export default function RootLayout({
       lang="en"
       className={`${bodyFont.variable} ${headingFont.variable} ${monoFont.variable}`}
     >
+      <head>
+        <MetaPixel />
+      </head>
       <body className="font-body min-h-screen bg-neutral-400 leading-normal text-neutral-100">
         <Suspense>
           <PostHogProvider>
