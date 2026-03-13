@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { type Metadata } from "next";
+import { QueryLink } from "~/components/QueryLink";
 
 import { Button } from "~/components/Button";
 import { FadeIn } from "~/components/FadeIn";
@@ -193,12 +193,12 @@ export default function SoloPage() {
             </div>
             <p className="mt-4 text-sm text-neutral-300">
               Have a larger team?{" "}
-              <Link
+              <QueryLink
                 href="/enterprise"
                 className="text-primary-200 underline underline-offset-2 transition hover:text-white"
               >
                 See Enterprise pricing
-              </Link>
+              </QueryLink>
             </p>
           </FadeIn>
         </div>

@@ -1,6 +1,13 @@
+
+"use client";
+
 import { type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  usePersistedQueryString,
+  appendQueryString,
+} from "~/components/QueryParamProvider";
 
 interface NavbarProps {
   children?: ReactNode;
@@ -15,6 +22,8 @@ export function Navbar({
   sticky = false,
   className = "",
 }: NavbarProps) {
+  const qs = usePersistedQueryString();
+
   return (
     <nav
       className={`shadow-theme relative ${sticky ? "sticky top-0 z-50" : ""} ${className}`}
@@ -22,7 +31,7 @@ export function Navbar({
       {/* Top bar */}
       <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-2 md:px-8 md:py-4">
         {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center">
+        <Link href={appendQueryString("/", qs)} className="flex shrink-0 items-center">
           <Image
             src="/logo.png"
             alt="Logo"

@@ -1,3 +1,5 @@
+"use client";
+
 import { type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Loader2 } from "lucide-react";
@@ -12,6 +14,10 @@ import {
   arrowSizeClasses,
   spinnerClasses,
 } from "./button-styles";
+import {
+  usePersistedQueryString,
+  appendQueryString,
+} from "~/components/QueryParamProvider";
 
 type BaseProps = {
   children: ReactNode;
@@ -62,6 +68,7 @@ export function Button(props: ButtonProps) {
     className = "shadow-theme",
     ...rest
   } = props;
+  const qs = usePersistedQueryString();
   const size: ButtonSize = rawSize ?? "md";
   const rounded: RoundedSize = rawRounded ?? "xl";
   const classes = [
@@ -127,7 +134,7 @@ export function Button(props: ButtonProps) {
       keyof BaseProps
     >;
     return (
-      <Link href={href} {...linkProps} {...linkRest}>
+      <Link href={appendQueryString(href, qs)} {...linkProps} {...linkRest}>
         {content}
       </Link>
     );

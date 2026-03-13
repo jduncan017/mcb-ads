@@ -5,15 +5,20 @@ import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 import { Navbar, Footer } from "~/components/layout";
 import { analytics } from "~/lib/analytics";
+import {
+  usePersistedQueryString,
+  appendQueryString,
+} from "~/components/QueryParamProvider";
 
 export default function LandingPage() {
   const router = useRouter();
+  const qs = usePersistedQueryString();
 
   function handlePath(category: "small-team" | "enterprise") {
     const destination =
       category === "enterprise" ? "enterprise" : "small-teams";
     analytics.funnelRouted(category, destination);
-    router.push(`/${destination}`);
+    router.push(appendQueryString(`/${destination}`, qs));
   }
 
   return (

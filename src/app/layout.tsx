@@ -6,6 +6,7 @@ import { bodyFont, headingFont, monoFont } from "~/fonts";
 import { PostHogProvider } from "~/components/PostHogProvider";
 import { CalEmbed } from "~/components/CalEmbed";
 import { MetaPixel } from "~/components/MetaPixel";
+import { QueryParamProvider } from "~/components/QueryParamProvider";
 
 export const metadata: Metadata = {
   title: "FinalBit — AI-Powered Pre-Production",
@@ -29,9 +30,11 @@ export default function RootLayout({
       <body className="font-body min-h-screen bg-neutral-400 leading-normal text-neutral-100">
         <Suspense>
           <PostHogProvider>
-            <div className="from-primary-400/20 to-primary-400/20 bg-linear-to-r via-transparent">
-              {children}
-            </div>
+            <QueryParamProvider>
+              <div className="from-primary-400/20 to-primary-400/20 bg-linear-to-r via-transparent">
+                {children}
+              </div>
+            </QueryParamProvider>
           </PostHogProvider>
         </Suspense>
         <CalEmbed />

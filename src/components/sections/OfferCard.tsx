@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import { Button } from "~/components/Button";
 import { Wrapper } from "~/components/Wrapper";
 import { FadeIn } from "~/components/FadeIn";
-import Link from "next/link";
+import { QueryLink } from "~/components/QueryLink";
 
 interface OfferCardProps {
   cta?: ReactNode;
@@ -84,12 +84,12 @@ export function OfferCard({ cta }: OfferCardProps) {
           </Wrapper>
           <p className="mt-4 text-sm text-neutral-300">
             Looking for a smaller plan?{" "}
-            <Link
+            <QueryLink
               href="/small-teams"
               className="text-primary-200 underline underline-offset-2 transition hover:text-white"
             >
               See small teams pricing
-            </Link>
+            </QueryLink>
           </p>
         </FadeIn>
       </div>
