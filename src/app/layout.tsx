@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { type Metadata } from "next";
 import { bodyFont, headingFont, monoFont } from "~/fonts";
 import { PostHogProvider } from "~/components/PostHogProvider";
-import { CalEmbed } from "~/components/CalEmbed";
 import { MetaPixel } from "~/components/MetaPixel";
 import { QueryParamProvider } from "~/components/QueryParamProvider";
 
@@ -37,7 +36,6 @@ export default function RootLayout({
             </QueryParamProvider>
           </PostHogProvider>
         </Suspense>
-        <CalEmbed />
       </body>
     </html>
   );

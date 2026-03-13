@@ -1,6 +1,6 @@
 import { FadeIn } from "~/components/FadeIn";
 import { Button } from "~/components/Button";
-import { calAttrs } from "~/lib/cal";
+import { CalButton } from "~/components/CalButton";
 
 export function BottomCTA() {
   return (
@@ -20,9 +20,9 @@ export function BottomCTA() {
             <Button as="link" href="/small-teams" size="lg" className="glow-cta shadow-theme">
               Start Free
             </Button>
-            <Button variant="outline" size="lg" {...calAttrs}>
+            <CalButton variant="outline" size="lg">
               Book a Demo
-            </Button>
+            </CalButton>
           </div>
         </FadeIn>
       </div>

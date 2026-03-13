@@ -1,11 +1,10 @@
 import { Users, Sparkles, RefreshCcw, X, Check } from "lucide-react";
-import { Button } from "~/components/Button";
 import { IconBubble } from "~/components/IconBubble";
 import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 import { Navbar, Footer } from "~/components/layout";
 import { OfferTicker } from "~/components/OfferTicker";
-import { calAttrs } from "~/lib/cal";
+import { CalButton } from "~/components/CalButton";
 import {
   Hero,
   FeatureGrid,
@@ -69,9 +68,9 @@ export default function TeamsPage() {
       <Navbar
         sticky
         cta={
-          <Button arrow {...calAttrs}>
+          <CalButton arrow>
             Book a Demo
-          </Button>
+          </CalButton>
         }
         className="bg-black/80 text-neutral-100 backdrop-blur-lg"
       />
@@ -91,14 +90,13 @@ export default function TeamsPage() {
         description="Stop juggling separate apps for scripts, breakdowns, schedules, budgets, and AI. FinalBit turns days of manual pre-production into hours — with everything connected in one workspace. Book a demo and we'll break down your script live so you can see exactly how it works for your project."
         screenshotDescription="Team workspace showing collaborative breakdown, shared schedule, and real-time budget tracking"
         cta={
-          <Button
+          <CalButton
             size="lg"
             arrow
             className="glow-cta shadow-theme"
-            {...calAttrs}
           >
             Book a Live Demo
-          </Button>
+          </CalButton>
         }
         image="/product/script-upload.png"
       />
@@ -171,14 +169,13 @@ export default function TeamsPage() {
           subheading="Everything your crew needs, connected in one workspace."
           features={features}
           cta={
-            <Button
+            <CalButton
               size="lg"
               arrow
               className="glow-cta shadow-theme w-full md:w-auto"
-              {...calAttrs}
             >
               Book a Demo
-            </Button>
+            </CalButton>
           }
         />
       </div>
@@ -193,14 +190,13 @@ export default function TeamsPage() {
       <hr />
       <OfferCard
         cta={
-          <Button
+          <CalButton
             size="lg"
             arrow
             className="glow-cta shadow-theme w-full md:w-auto"
-            {...calAttrs}
           >
             Book a Demo — Save 90%
-          </Button>
+          </CalButton>
         }
       />
 
