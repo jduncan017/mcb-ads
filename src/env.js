@@ -8,6 +8,9 @@ export const env = createEnv({
    */
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
+    CAL_WEBHOOK_SECRET: z.string().min(1).optional(),
+    META_PIXEL_ID: z.string().min(1).optional(),
+    META_CONVERSIONS_API_TOKEN: z.string().min(1).optional(),
   },
 
   /**
@@ -26,6 +29,9 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
+    CAL_WEBHOOK_SECRET: process.env.CAL_WEBHOOK_SECRET,
+    META_PIXEL_ID: process.env.META_PIXEL_ID,
+    META_CONVERSIONS_API_TOKEN: process.env.META_CONVERSIONS_API_TOKEN,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
