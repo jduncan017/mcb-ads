@@ -36,6 +36,8 @@ export async function POST(request: NextRequest) {
 
   const payload = JSON.parse(body) as CalWebhookPayload;
 
+  console.log("Cal.com webhook payload:", JSON.stringify(payload, null, 2));
+
   // Only process confirmed bookings
   if (payload.triggerEvent !== "BOOKING_CREATED") {
     return NextResponse.json({ ok: true });
