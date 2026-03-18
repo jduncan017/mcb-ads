@@ -93,6 +93,8 @@ export async function POST(request: NextRequest) {
         },
       },
     ],
+    // Test event code for Meta's Test Events tab — remove after verifying
+    test_event_code: "TEST33786",
   };
 
   const metaResponse = await fetch(
