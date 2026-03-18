@@ -4,14 +4,18 @@ import crypto from "crypto";
 /**
  * Cal.com webhook handler for booking confirmations.
  *
- * When a booking is confirmed, checks for Meta ad attribution (fbclid) in the
- * booking metadata. If present, fires a server-side Meta Conversions API event
- * so that only ad-attributed bookings are tracked as conversions.
+ * When a booking is confirmed, checks for Meta ad attribution (utm_source or
+ * fbclid) in the Cal.com booking responses. If present, fires a server-side
+ * Meta Conversions API event so that only ad-attributed bookings are tracked.
+ *
+ * Cal.com stores query params passed via the booking link as hidden fields in
+ * `payload.responses` (e.g. utm_source, fbclid).
  *
  * Setup:
  * 1. In Cal.com → Settings → Developer → Webhooks, add this URL and select "Booking Created"
  * 2. Set a webhook signing secret and add it as CAL_WEBHOOK_SECRET in your env
  * 3. Add META_PIXEL_ID and META_CONVERSIONS_API_TOKEN to your env
+ * 4. (Optional) Add "fbclid" as a hidden booking question in Cal.com for click-level attribution
  */
 
 export async function POST(request: NextRequest) {
@@ -43,13 +47,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // Cal.com passes query params from the booking link as metadata/responses
-  // The fbclid param indicates the user came from a Meta ad
-  const queryParams = extractQueryParams(payload);
-  const fbclid = queryParams.get("fbclid");
+  // Cal.com stores query params from the booking link as hidden response fields
+  const responses = payload.payload?.responses ?? {};
+  const utmSource = getResponseValue(responses.utm_source);
+  const fbclid = getResponseValue(responses.fbclid);
 
-  if (!fbclid) {
-    // No Meta attribution — skip pixel firing
+  const isFromMeta =
+    fbclid ??
+    (utmSource &&
+      ["facebook", "fb", "ig", "instagram", "meta"].includes(
+        utmSource.toLowerCase(),
+      ));
+
+  if (!isFromMeta) {
     return NextResponse.json({ ok: true, meta: false });
   }
 
@@ -75,7 +85,8 @@ export async function POST(request: NextRequest) {
         event_time: eventTime,
         action_source: "website",
         user_data: {
-          fbc: `fb.1.${eventTime}.${fbclid}`,
+          // Include fbc (click ID) only if fbclid was captured
+          ...(fbclid && { fbc: `fb.1.${eventTime}.${fbclid}` }),
           ...(email && {
             em: [await hashSHA256(email.toLowerCase().trim())],
           }),
@@ -105,21 +116,14 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ ok: true, meta: true });
 }
 
-/**
- * Extract query params that were passed through the Cal.com booking link.
- * Cal.com stores these in the booking metadata under different fields
- * depending on the integration version.
- */
-function extractQueryParams(payload: CalWebhookPayload): URLSearchParams {
-  const metadata = payload.payload?.metadata;
-  if (!metadata) return new URLSearchParams();
-
-  // Cal.com stores the original query string in metadata
-  if (typeof metadata === "object") {
-    return new URLSearchParams(metadata as Record<string, string>);
-  }
-
-  return new URLSearchParams();
+/** Extract the string value from a Cal.com response field */
+function getResponseValue(
+  field: { value?: string } | undefined,
+): string | undefined {
+  if (!field?.value) return undefined;
+  if (typeof field.value === "string" && field.value.length > 0)
+    return field.value;
+  return undefined;
 }
 
 async function hashSHA256(value: string): Promise<string> {
@@ -133,7 +137,7 @@ async function hashSHA256(value: string): Promise<string> {
 interface CalWebhookPayload {
   triggerEvent: string;
   payload?: {
-    metadata?: unknown;
+    responses?: Record<string, { value?: string }>;
     attendees?: { email?: string }[];
   };
 }
