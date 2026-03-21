@@ -17,6 +17,7 @@ interface CalButtonProps {
   size?: ButtonSize;
   arrow?: boolean;
   className?: string;
+  buttonId?: string;
 }
 
 export function CalButton({
@@ -25,6 +26,7 @@ export function CalButton({
   size = "md",
   arrow = false,
   className = "shadow-theme",
+  buttonId,
 }: CalButtonProps) {
   const qs = usePersistedQueryString();
   const href = qs ? `${CAL_BASE_URL}?${qs}` : CAL_BASE_URL;
@@ -40,6 +42,7 @@ export function CalButton({
       arrow={arrow}
       className={className}
       onClick={() => analytics.calModalOpened(window.location.pathname)}
+      {...(buttonId && { "data-ph-capture-attribute-button-id": buttonId })}
     >
       {children}
     </Button>

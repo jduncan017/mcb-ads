@@ -29,4 +29,12 @@ export const analytics = {
   ctaClicked(label: string, page: string) {
     posthog.capture("cta_clicked", { label, page });
   },
+
+  /** User clicked a non-enterprise plan signup from the enterprise page */
+  planSignupClicked(plan: string) {
+    posthog.capture("plan_signup_clicked", {
+      plan,
+      source: "enterprise_page",
+    });
+  },
 };

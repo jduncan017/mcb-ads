@@ -1,32 +1,17 @@
-import { Users, Sparkles, RefreshCcw, X, Check } from "lucide-react";
+import { Users, Sparkles, RefreshCcw } from "lucide-react";
 import { IconBubble } from "~/components/IconBubble";
-import { FadeIn } from "~/components/FadeIn";
-import { Eyebrow } from "~/components/Eyebrow";
+import { Button } from "~/components/Button";
 import { Navbar, Footer } from "~/components/layout";
 import { OfferTicker } from "~/components/OfferTicker";
 import { CalButton } from "~/components/CalButton";
 import {
   Hero,
   FeatureGrid,
-  ProductShowcase,
   ComparisonTable,
-  OfferCard,
   SocialProof,
+  FullPricing,
+  Testimonials,
 } from "~/components/sections";
-
-const before = [
-  "4+ disconnected tools",
-  "Days of manual breakdown",
-  "Script changes = manual updates everywhere",
-  "Separate AI subscriptions per tool",
-];
-
-const after = [
-  "One connected platform",
-  "Minutes with AI automation",
-  "Changes propagate automatically",
-  "Multi-model AI access included",
-];
 
 const features = [
   {
@@ -61,17 +46,37 @@ const features = [
   },
 ];
 
+const testimonials = [
+  {
+    quote:
+      "As an independent filmmaker, FinalBit makes life so much easier. From ironing out my story ideas, to creating a pitch deck, to doing ALL of my pre-production, it is the most advanced, AI enhanced, all in one production assistant.",
+    name: "Bryce Hirschberg",
+    role: "Director · Writer · Editor · Actor",
+    image: "/bryce_hirschberg.webp",
+  },
+  {
+    quote:
+      "FinalBit's powerful array of AI-integrated functionalities is so impressive that it has displaced four of my other screenwriting software programs. Thanks to FinalBit, I have completed over a year's worth of work in just three months.",
+    name: "J. Thomas Stroud, Jr.",
+    role: "Writer",
+    image: "/j-thomas-stroud.webp",
+  },
+  {
+    quote:
+      "When I use FinalBit, I feel like I've stepped into the future. Basically a one stop tool for writers, directors, and producers of all skill levels. With a few clicks I get coverage, script notes, storyboards, even a shooting schedule.",
+    name: "Daniel Farag",
+    role: "Actor · Producer · Writer",
+    image: "/daniel_farag.webp",
+  },
+];
+
 export default function TeamsPage() {
   return (
     <main className="flex min-h-screen flex-col">
       {/* Navbar */}
       <Navbar
         sticky
-        cta={
-          <CalButton arrow>
-            Book a Demo
-          </CalButton>
-        }
+        cta={<CalButton arrow buttonId="nav-book-demo">Book a Demo</CalButton>}
         className="bg-black/80 text-neutral-100 backdrop-blur-lg"
       />
 
@@ -80,88 +85,36 @@ export default function TeamsPage() {
 
       {/* Hero */}
       <Hero
-        tagline="For Film & TV Studios"
+        tagline="For Filmmakers & Production Teams"
         heading={
           <>
-            One Subscription Replaces{" "}
+            One Platform Replaces{" "}
             <span className="text-primary-300">4+ Tools</span>
           </>
         }
         description="Stop juggling separate apps for scripts, breakdowns, schedules, budgets, and AI. FinalBit turns days of manual pre-production into hours — with everything connected in one workspace. Book a demo and we'll break down your script live so you can see exactly how it works for your project."
         screenshotDescription="Team workspace showing collaborative breakdown, shared schedule, and real-time budget tracking"
         cta={
-          <CalButton
+          <Button
+            as="a"
+            href="#pricing"
             size="lg"
             arrow
             className="glow-cta shadow-theme"
+            data-ph-capture-attribute-button-id="hero-view-pricing"
           >
-            Book a Live Demo
-          </CalButton>
+            View Pricing
+          </Button>
         }
         image="/product/script-upload.png"
       />
 
-      {/* Pain Points — Before / After */}
-      <hr />
-      <section className="section-pad relative overflow-hidden bg-black/20">
-        <div className="relative mx-auto max-w-[1200px]">
-          <FadeIn>
-            <Eyebrow className="mb-3 text-center">
-              Too Many Tools, Not Enough Time
-            </Eyebrow>
-            <h2 className="mb-10 text-center">
-              Stop Juggling Disconnected Tools
-            </h2>
-          </FadeIn>
-          <div className="mx-auto grid max-w-[1080px] gap-6 md:grid-cols-2">
-            {/* Before card */}
-            <FadeIn>
-              <div className="h-full rounded-xl border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20 p-10">
-                <h3 className="mb-6 text-neutral-200/90">Common Workflow</h3>
-                <ul className="space-y-4">
-                  {before.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-lg">
-                      <X
-                        className="mt-0.5 h-6 w-6 shrink-0 text-red-400"
-                        strokeWidth={2.5}
-                      />
-                      <span className="text-neutral-200/70">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </FadeIn>
-
-            {/* After card */}
-            <FadeIn delay={100}>
-              <div className="h-full rounded-xl border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20 p-10">
-                <h3 className="mb-6 text-white">With FinalBit</h3>
-                <ul className="space-y-4">
-                  {after.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-lg">
-                      <Check
-                        className="text-secondary-300 mt-0.5 h-6 w-6 shrink-0"
-                        strokeWidth={2.5}
-                      />
-                      <span className="text-neutral-200">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </FadeIn>
-          </div>
-        </div>
-      </section>
-
-      {/* Full Product View */}
-      <ProductShowcase image="/product/pitch-deck.png" />
-
       {/* Social Proof */}
-      <div className="SocialProofWrapper mb-16 md:mb-40">
+      <div className="SocialProofWrapper px-6 pb-16 md:pb-40">
         <SocialProof />
       </div>
 
-      {/* Features */}
+      {/* Feature Highlights */}
       <hr />
       <div id="features">
         <FeatureGrid
@@ -169,13 +122,16 @@ export default function TeamsPage() {
           subheading="Everything your crew needs, connected in one workspace."
           features={features}
           cta={
-            <CalButton
+            <Button
+              as="a"
+              href="#pricing"
               size="lg"
               arrow
               className="glow-cta shadow-theme w-full md:w-auto"
+              data-ph-capture-attribute-button-id="features-view-pricing"
             >
-              Book a Demo
-            </CalButton>
+              View Pricing
+            </Button>
           }
         />
       </div>
@@ -186,19 +142,32 @@ export default function TeamsPage() {
         <ComparisonTable />
       </div>
 
-      {/* Offer */}
+      {/* Pricing — All 4 Tiers */}
       <hr />
-      <OfferCard
-        cta={
-          <CalButton
-            size="lg"
-            arrow
-            className="glow-cta shadow-theme w-full md:w-auto"
-          >
+      <div id="pricing">
+        <FullPricing />
+      </div>
+
+      {/* Testimonials */}
+      <hr />
+      <Testimonials eyebrow="What Creators Say" testimonials={testimonials} />
+
+      {/* Final CTA */}
+      <hr />
+      <section className="relative px-6 py-20 md:py-28">
+        <div className="gradient-orb bg-primary-300 top-0 -left-32 h-[400px] w-[400px]" />
+        <div className="gradient-orb bg-secondary-300 -right-32 bottom-0 h-[300px] w-[300px]" />
+        <div className="relative mx-auto max-w-2xl text-center">
+          <h2 className="mb-4">Ready to Replace Your Tool Stack?</h2>
+          <p className="mb-8 text-neutral-200">
+            Join 45,000+ filmmakers and studios who go from screenplay to full
+            pre-production in minutes. Lock in 90% off your first month.
+          </p>
+          <CalButton size="lg" arrow className="glow-cta shadow-theme" buttonId="footer-cta-demo">
             Book a Demo — Save 90%
           </CalButton>
-        }
-      />
+        </div>
+      </section>
 
       {/* Footer */}
       <hr className="mt-auto" />
