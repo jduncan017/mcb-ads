@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // Cal.com stores query params from the booking link as hidden response fields
-  const responses = payload.payload?.responses ?? {};
+  // Cal.com sends responses and attendees at the top level of the payload
+  const responses = payload.responses ?? {};
   const utmSource = getResponseValue(responses.utm_source);
   const fbclid = getResponseValue(responses.fbclid);
 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
   }
 
   const eventTime = Math.floor(Date.now() / 1000);
-  const email = payload.payload?.attendees?.[0]?.email;
+  const email = payload.attendees?.[0]?.email;
 
   const eventData = {
     data: [
@@ -134,8 +134,6 @@ async function hashSHA256(value: string): Promise<string> {
 
 interface CalWebhookPayload {
   triggerEvent: string;
-  payload?: {
-    responses?: Record<string, { value?: string }>;
-    attendees?: { email?: string }[];
-  };
+  responses?: Record<string, { value?: string }>;
+  attendees?: { email?: string }[];
 }
