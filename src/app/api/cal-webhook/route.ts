@@ -45,8 +45,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // Cal.com sends responses and attendees at the top level of the payload
-  const responses = payload.responses ?? {};
+  // Cal.com may nest data under a "payload" key or send it at the top level
+  const inner = payload.payload ?? payload;
+  const responses = inner.responses ?? {};
   const utmSource = getResponseValue(responses.utm_source);
   const fbclid = getResponseValue(responses.fbclid);
 
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
   }
 
   const eventTime = Math.floor(Date.now() / 1000);
-  const email = payload.attendees?.[0]?.email;
+  const email = inner.attendees?.[0]?.email;
 
   const eventData = {
     data: [
@@ -132,8 +133,12 @@ async function hashSHA256(value: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-interface CalWebhookPayload {
-  triggerEvent: string;
+interface CalWebhookInner {
   responses?: Record<string, { value?: string }>;
   attendees?: { email?: string }[];
+}
+
+interface CalWebhookPayload extends CalWebhookInner {
+  triggerEvent: string;
+  payload?: CalWebhookInner;
 }
