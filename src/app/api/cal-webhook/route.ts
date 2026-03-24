@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
   const eventData = {
     data: [
       {
-        event_name: "Schedule",
+        event_name: "Lead",
         event_time: eventTime,
         action_source: "website",
         user_data: {
