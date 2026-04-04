@@ -1,9 +1,9 @@
 import { Users, Sparkles, RefreshCcw } from "lucide-react";
 import { IconBubble } from "~/components/IconBubble";
-import { Button } from "~/components/Button";
 import { Navbar, Footer } from "~/components/layout";
 import { OfferTicker } from "~/components/OfferTicker";
 import { CalButton } from "~/components/CalButton";
+import { PricingLink } from "~/components/PricingLink";
 import {
   Hero,
   FeatureGrid,
@@ -95,16 +95,14 @@ export default function TeamsPage() {
         description="Stop juggling separate apps for scripts, breakdowns, schedules, budgets, and AI. FinalBit turns days of manual pre-production into hours — with everything connected in one workspace. Book a demo and we'll break down your script live so you can see exactly how it works for your project."
         screenshotDescription="Team workspace showing collaborative breakdown, shared schedule, and real-time budget tracking"
         cta={
-          <Button
-            as="a"
-            href="#pricing"
+          <PricingLink
             size="lg"
             arrow
             className="glow-cta shadow-theme"
-            data-ph-capture-attribute-button-id="hero-view-pricing"
+            source="hero"
           >
             View Pricing
-          </Button>
+          </PricingLink>
         }
         image="/product/script-upload.png"
       />
@@ -122,16 +120,14 @@ export default function TeamsPage() {
           subheading="Everything your crew needs, connected in one workspace."
           features={features}
           cta={
-            <Button
-              as="a"
-              href="#pricing"
+            <PricingLink
               size="lg"
               arrow
               className="glow-cta shadow-theme w-full md:w-auto"
-              data-ph-capture-attribute-button-id="features-view-pricing"
+              source="features"
             >
               View Pricing
-            </Button>
+            </PricingLink>
           }
         />
       </div>
