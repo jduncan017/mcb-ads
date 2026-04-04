@@ -5,6 +5,8 @@ import { type Metadata } from "next";
 import { bodyFont, headingFont, monoFont } from "~/fonts";
 import { PostHogProvider } from "~/components/PostHogProvider";
 import { MetaPixel } from "~/components/MetaPixel";
+import { GoogleTag } from "~/components/GoogleTag";
+import { SailfishRecorder } from "~/components/SailfishRecorder";
 import { QueryParamProvider } from "~/components/QueryParamProvider";
 
 export const metadata: Metadata = {
@@ -25,8 +27,10 @@ export default function RootLayout({
     >
       <head>
         <MetaPixel />
+        <GoogleTag />
       </head>
       <body className="font-body min-h-screen bg-neutral-400 leading-normal text-neutral-100">
+        <SailfishRecorder />
         <Suspense>
           <PostHogProvider>
             <QueryParamProvider>
