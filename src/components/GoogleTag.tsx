@@ -1,16 +1,18 @@
 "use client";
 
 import Script from "next/script";
-
-const GA_MEASUREMENT_ID = "G-CMRS9SPM63";
+import { env } from "~/env";
 
 export function GoogleTag() {
   if (process.env.NODE_ENV === "development") return null;
 
+  const measurementId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  if (!measurementId) return null;
+
   return (
     <>
       <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
         strategy="afterInteractive"
       />
       <Script
@@ -21,7 +23,7 @@ export function GoogleTag() {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
+            gtag('config', '${measurementId}');
           `,
         }}
       />

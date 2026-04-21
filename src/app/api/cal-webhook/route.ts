@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Fire Meta Conversions API event
-  const pixelId = process.env.META_PIXEL_ID;
+  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
   const accessToken = process.env.META_CONVERSIONS_API_TOKEN;
 
   if (!pixelId || !accessToken) {

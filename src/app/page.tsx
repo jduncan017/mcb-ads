@@ -13,7 +13,7 @@ import { redirect } from "next/navigation";
 // } from "~/components/QueryParamProvider";
 
 export default function LandingPage() {
-  redirect("/enterprise");
+  redirect("/general");
 
   // const router = useRouter();
   // const qs = usePersistedQueryString();

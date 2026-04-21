@@ -2,18 +2,18 @@ import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 
 const stats = [
-  { value: "45,000+", label: "Filmmakers" },
-  { value: "70,000+", label: "Scripts Analyzed" },
-  { value: "90%", label: "Time Saved" },
-  { value: "4.9/5", label: "Rating" },
+  { value: "5★", label: "Client Reviews" },
+  { value: "BAR", label: "5-Day Certified" },
+  { value: "Any Season", label: "Year-Round Availability" },
+  { value: "Denver+", label: "Colorado Mountains" },
 ];
 
 export function SocialProof() {
   return (
-    <section className="shadow-theme mx-4 max-w-[1200px] rounded-xl border border-gray-200/20 bg-black/20 p-6 md:mx-auto md:rounded-full md:p-20">
+    <section className="from-primary-400/25 via-primary-300/10 to-primary-400/25 mx-4 max-w-[1200px] rounded-xl border border-white/10 bg-linear-to-b p-6 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.7)] backdrop-blur-sm md:mx-auto md:rounded-full md:p-20">
       <FadeIn>
         <Eyebrow className="mb-6 text-center md:mb-10">
-          Trusted by filmmakers and studios worldwide
+          Trusted by Denver&apos;s top venues, planners, and private hosts
         </Eyebrow>
       </FadeIn>
       <div className="flex flex-col gap-6 md:grid md:grid-cols-4 md:gap-8">

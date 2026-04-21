@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
+import { env } from "~/env";
 
 export function SailfishRecorder() {
   useEffect(() => {
+    const apiKey = env.NEXT_PUBLIC_SAILFISH_API_KEY;
+    if (!apiKey) return;
+
     const initSailfishRecorder = async () => {
       if (typeof window !== "undefined") {
         try {
           const { initRecorder } = await import("@sailfish-ai/recorder");
           await initRecorder({
-            apiKey: "b457b570-52c6-4cbc-9885-ebd132e95e6e",
+            apiKey,
             domainsToPropagateHeaderTo: [],
             domainsToNotPropagateHeaderTo: [],
             reportIssueShortcuts: {

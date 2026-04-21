@@ -1,6 +1,7 @@
 "use client";
 
-const message = "Enterprise offer — First month $100 (save 90%)";
+const message =
+  "Now booking 2026 weddings & private events — Free custom quote within 24 hours";
 
 export function OfferTicker() {
   const items = Array.from({ length: 12 }, (_, i) => (

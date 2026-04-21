@@ -42,7 +42,7 @@ export function Testimonials({
   }
 
   return (
-    <section className="section-pad shadow-theme bg-black/20">
+    <section className="section-pad section-gradient">
       <div className="mx-auto max-w-[1400px]">
         <FadeIn>
           <Eyebrow className="mb-3 text-center">{eyebrow}</Eyebrow>
@@ -50,9 +50,9 @@ export function Testimonials({
         </FadeIn>
 
         {/* Desktop: grid */}
-        <div className="hidden gap-8 lg:grid lg:grid-cols-3">
+        <div className="hidden gap-8 lg:grid lg:grid-cols-3 lg:items-stretch">
           {testimonials.map((t, i) => (
-            <FadeIn key={t.name} delay={i * 100}>
+            <FadeIn key={t.name} delay={i * 100} className="h-full">
               <TestimonialCard testimonial={t} />
             </FadeIn>
           ))}
@@ -127,19 +127,28 @@ function TestimonialCard({ testimonial: t }: { testimonial: Testimonial }) {
     <Wrapper
       rounded="lg"
       padding="sm"
-      className="card-hover h-full flex-col border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20"
+      className="card-hover flex h-full flex-col border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20"
     >
       <p className="text-xl leading-relaxed font-light text-neutral-200">
         &ldquo;{t.quote}&rdquo;
       </p>
-      <div className="mt-8 flex items-center gap-3">
-        <Image
-          src={t.image ?? "/logo.png"}
-          alt={t.name}
-          width={40}
-          height={40}
-          className="h-16 w-16 shrink-0 rounded-full object-cover"
-        />
+      <div className="mt-auto flex items-center gap-3 pt-8">
+        {t.image ? (
+          <Image
+            src={t.image}
+            alt={t.name}
+            width={64}
+            height={64}
+            className="h-16 w-16 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <div
+            aria-hidden
+            className="font-heading bg-primary-400/40 border-primary-300/40 text-primary-100 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border text-2xl font-semibold"
+          >
+            {t.name.charAt(0).toUpperCase()}
+          </div>
+        )}
         <div>
           <p className="text-xl font-medium">{t.name}</p>
           <p className="text-lg text-neutral-200">{t.role}</p>

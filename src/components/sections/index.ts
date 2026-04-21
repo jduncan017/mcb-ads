@@ -10,4 +10,5 @@ export { EmailCapture } from "./EmailCapture";
 export { ProductShowcase } from "./ProductShowcase";
 export { ValueProps } from "./ValueProps";
 export { SocialProof } from "./SocialProof";
+export { EventTypes } from "./EventTypes";
 export { BottomCTA } from "./BottomCTA";

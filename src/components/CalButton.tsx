@@ -4,12 +4,11 @@ import { type ReactNode } from "react";
 import { Button } from "~/components/Button";
 import { usePersistedQueryString } from "~/components/QueryParamProvider";
 import { analytics } from "~/lib/analytics";
+import { env } from "~/env";
 import {
   type ButtonVariant,
   type ButtonSize,
 } from "~/components/button-styles";
-
-const CAL_BASE_URL = "https://cal.com/finalbit/demo-booking";
 
 interface CalButtonProps {
   children: ReactNode;
@@ -29,7 +28,8 @@ export function CalButton({
   buttonId,
 }: CalButtonProps) {
   const qs = usePersistedQueryString();
-  const href = qs ? `${CAL_BASE_URL}?${qs}` : CAL_BASE_URL;
+  const baseUrl = env.NEXT_PUBLIC_BOOKING_URL ?? "#";
+  const href = qs && baseUrl !== "#" ? `${baseUrl}?${qs}` : baseUrl;
 
   return (
     <Button

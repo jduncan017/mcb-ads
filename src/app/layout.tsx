@@ -3,16 +3,19 @@ import "~/styles/globals.css";
 import { Suspense } from "react";
 import { type Metadata } from "next";
 import { bodyFont, headingFont, monoFont } from "~/fonts";
+import { env } from "~/env";
 import { PostHogProvider } from "~/components/PostHogProvider";
 import { MetaPixel } from "~/components/MetaPixel";
 import { GoogleTag } from "~/components/GoogleTag";
 import { SailfishRecorder } from "~/components/SailfishRecorder";
 import { QueryParamProvider } from "~/components/QueryParamProvider";
 
+const siteName = env.NEXT_PUBLIC_SITE_NAME ?? "Mobile Craft Bars";
+
 export const metadata: Metadata = {
-  title: "FinalBit — AI-Powered Pre-Production",
+  title: `${siteName} — Denver Mobile Bar & Craft Cocktails`,
   description:
-    "Breakdowns, scheduling, budgets, storyboards, and video — one AI platform, fully connected to your screenplay.",
+    "Professional bartenders, custom cocktail menus, and full-service setup for weddings, corporate events, and private parties across Denver and the Colorado mountains.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   robots: { index: false, follow: false },
 };
@@ -33,11 +36,7 @@ export default function RootLayout({
         <SailfishRecorder />
         <Suspense>
           <PostHogProvider>
-            <QueryParamProvider>
-              <div className="from-primary-400/20 to-primary-400/20 bg-linear-to-r via-transparent">
-                {children}
-              </div>
-            </QueryParamProvider>
+            <QueryParamProvider>{children}</QueryParamProvider>
           </PostHogProvider>
         </Suspense>
       </body>

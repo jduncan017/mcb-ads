@@ -3,46 +3,45 @@ import { z } from "zod";
 
 export const env = createEnv({
   /**
-   * Specify your server-side environment variables schema here. This way you can ensure the app
-   * isn't built with invalid env vars.
+   * Server-side only. Used in webhook handlers, server components.
    */
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
+    // Booking webhook signature — rename per provider (Cal.com, Calendly, etc.)
     CAL_WEBHOOK_SECRET: z.string().min(1).optional(),
-    META_PIXEL_ID: z.string().min(1).optional(),
+    // Meta Conversions API (server-side pixel)
     META_CONVERSIONS_API_TOKEN: z.string().min(1).optional(),
   },
 
   /**
-   * Specify your client-side environment variables schema here. This way you can ensure the app
-   * isn't built with invalid env vars. To expose them to the client, prefix them with
-   * `NEXT_PUBLIC_`.
+   * Client-side (must be prefixed NEXT_PUBLIC_). All brand/integration IDs
+   * live here so a clone-to-new-client is purely an env swap.
    */
   client: {
+    // Brand
+    NEXT_PUBLIC_SITE_NAME: z.string().min(1).optional(),
+    // Booking provider URL (Calendly, Cal.com, etc.) — include full event path
+    NEXT_PUBLIC_BOOKING_URL: z.string().url().optional(),
+    // Analytics / tracking
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+    NEXT_PUBLIC_META_PIXEL_ID: z.string().min(1).optional(),
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().min(1).optional(),
+    NEXT_PUBLIC_SAILFISH_API_KEY: z.string().min(1).optional(),
   },
 
-  /**
-   * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
-   * middlewares) or client-side so we need to destruct manually.
-   */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     CAL_WEBHOOK_SECRET: process.env.CAL_WEBHOOK_SECRET,
-    META_PIXEL_ID: process.env.META_PIXEL_ID,
     META_CONVERSIONS_API_TOKEN: process.env.META_CONVERSIONS_API_TOKEN,
+    NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
+    NEXT_PUBLIC_BOOKING_URL: process.env.NEXT_PUBLIC_BOOKING_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    NEXT_PUBLIC_SAILFISH_API_KEY: process.env.NEXT_PUBLIC_SAILFISH_API_KEY,
   },
-  /**
-   * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
-   * useful for Docker builds.
-   */
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
-  /**
-   * Makes it so that empty strings are treated as undefined. `SOME_VAR: z.string()` and
-   * `SOME_VAR=''` will throw an error.
-   */
   emptyStringAsUndefined: true,
 });

@@ -17,8 +17,7 @@
     var(--font-body-face), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-heading:
-    var(--font-heading-face), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    var(--font-heading-face), ui-serif, Georgia, "Times New Roman", serif;
   --font-mono: var(--font-mono-face), "Courier Prime", ui-monospace, monospace;
 
   /*
@@ -41,29 +40,38 @@
   --font-size-3xl: 6.854rem;
   --font-size-3xl--line-height: 7.5rem;
 
-  /* Primary — FinalBit blue */
-  --color-primary-100: #e8f1fd;
-  --color-primary-200: #7db3f0;
-  --color-primary-300: #1d6ee3;
-  --color-primary-400: #1557b3;
+  /* Primary — MCB steel blue (matches logo gradient) */
+  --color-primary-100: #eaf1fa;
+  --color-primary-200: #a6c7e8;
+  --color-primary-300: #6590c3;
+  --color-primary-400: #2d4e7a;
 
-  /* Secondary — green accent */
-  --color-secondary-100: #eefbda;
-  --color-secondary-200: #c8f087;
-  --color-secondary-300: #aceb4f;
-  --color-secondary-400: #7ab82a;
+  /* Secondary — warm amber accent (cocktail/craft vibe) */
+  --color-secondary-100: #fdf4e3;
+  --color-secondary-200: #f0d28b;
+  --color-secondary-300: #d9a646;
+  --color-secondary-400: #a87a1f;
 
-  /* Tertiary — orange accent */
-  --color-tertiary-100: #fdf3e0;
-  --color-tertiary-200: #f2c873;
-  --color-tertiary-300: #ea9e2b;
-  --color-tertiary-400: #c07d15;
+  /* Tertiary — deep copper (accent for premium touches) */
+  --color-tertiary-100: #f9ebe0;
+  --color-tertiary-200: #d9a383;
+  --color-tertiary-300: #b06a3f;
+  --color-tertiary-400: #7a4123;
 
-  /* Neutral — cool tones for text & backgrounds */
+  /* Neutral — cool dark tones matching MCB site */
   --color-neutral-100: #f5f6f8;
   --color-neutral-200: #c2ccda;
   --color-neutral-300: #6b7280;
-  --color-neutral-400: #191b1f;
+  --color-neutral-400: #07090f;
+
+  /* Floating section gradient — dark → blue-tinted mid → dark */
+  --section-gradient: linear-gradient(
+    180deg,
+    #0c1220 0%,
+    #1a2038 50%,
+    #0c1220 100%
+  );
+  --section-border: rgba(255, 255, 255, 0.06);
 
   /* Gray — pure grays for borders & utilities */
   --color-gray-100: #f4f4f5;
@@ -165,62 +173,13 @@
   }
 }
 
-@keyframes product-tilt-right {
-  from {
-    transform: translateX(30px) rotateY(-6deg);
-  }
-  to {
-    transform: translateX(10px) rotateY(-3deg);
-  }
-}
-
-@keyframes product-tilt-left {
-  from {
-    transform: translateX(-30px) rotateY(6deg);
-  }
-  to {
-    transform: translateX(-10px) rotateY(3deg);
-  }
-}
-
-@keyframes product-tilt-center {
-  from {
-    transform: scale(0.96) translateY(8px);
-  }
-  to {
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes product-slide-right-mobile {
-  from {
-    transform: translateX(40px);
-    opacity: 0.5;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes product-slide-left-mobile {
-  from {
-    transform: translateX(-40px);
-    opacity: 0.5;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(29, 110, 227, 0.3);
+    box-shadow: 0 0 20px rgba(101, 144, 195, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(29, 110, 227, 0.5);
+    box-shadow: 0 0 30px rgba(101, 144, 195, 0.5);
   }
 }
 
@@ -232,38 +191,10 @@
   }
   .card-hover:hover {
     transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 8px 30px rgba(29, 110, 227, 0.15);
+    box-shadow: 0 8px 30px rgba(101, 144, 195, 0.15);
   }
   .glow-cta {
     animation: glow-pulse 2s ease-in-out infinite;
-  }
-  /* Product image — window chrome + glow + directional tilt */
-  .product-image-perspective {
-    perspective: 1200px;
-  }
-  .product-image-glow {
-    box-shadow:
-      0 0 30px rgba(29, 110, 227, 0.25),
-      0 0 60px rgba(29, 110, 227, 0.15),
-      0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-  .product-tilt-right {
-    animation: product-tilt-right 0.8s ease-out 0.3s both;
-  }
-  .product-tilt-left {
-    animation: product-tilt-left 0.8s ease-out 0.3s both;
-  }
-  .product-tilt-center {
-    animation: product-tilt-center 0.8s ease-out 0.3s both;
-  }
-  /* Mobile: slide in from sides without rotateY */
-  @media (max-width: 1024px) {
-    .product-tilt-right {
-      animation-name: product-slide-right-mobile;
-    }
-    .product-tilt-left {
-      animation-name: product-slide-left-mobile;
-    }
   }
   .gradient-orb {
     position: absolute;
@@ -283,13 +214,16 @@
     }
   }
 
-  /* Mobile: product images bleed to edges, no perspective */
-  @media (max-width: 767px) {
-    .product-image-perspective {
-      perspective: none;
-    }
-    .product-image-glow {
-      border-radius: 8px;
-    }
+  /*
+   * Floating section — vertical gradient band with hairline borders.
+   * Creates the "band" effect seen on the MCB site: dark page bg
+   * flanks a slightly lifted, blue-tinted content band.
+   */
+  .section-gradient {
+    background: var(--section-gradient);
+    border-top: 1px solid var(--section-border);
+    border-bottom: 1px solid var(--section-border);
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
   }
+
 }

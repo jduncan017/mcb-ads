@@ -26,7 +26,7 @@ export function FeatureGrid({
   const gridCols = columns === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3";
 
   return (
-    <section className="section-pad shadow-theme bg-black/20">
+    <section className="section-pad section-gradient">
       <div className="mx-auto max-w-[1200px]">
         {(heading ?? subheading) && (
           <FadeIn>
@@ -38,13 +38,13 @@ export function FeatureGrid({
             </div>
           </FadeIn>
         )}
-        <div className={`grid gap-6 ${gridCols}`}>
+        <div className={`grid items-stretch gap-6 ${gridCols}`}>
           {features.map((f, i) => (
-            <FadeIn key={f.title} delay={i * 100}>
+            <FadeIn key={f.title} delay={i * 100} className="h-full">
               <Wrapper
                 rounded="lg"
                 padding="sm"
-                className="card-hover border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20"
+                className="card-hover flex h-full flex-col border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20"
               >
                 <div className="mb-4">{f.icon}</div>
                 <h3>{f.title}</h3>
