@@ -1,7 +1,10 @@
-import { Martini, Sparkles, Users } from "lucide-react";
+import { Martini, Sparkles, Users, X, Check } from "lucide-react";
 import { IconBubble } from "~/components/IconBubble";
 import { Navbar, Footer } from "~/components/layout";
 import { CalButton } from "~/components/CalButton";
+import { FadeIn } from "~/components/FadeIn";
+import { Eyebrow } from "~/components/Eyebrow";
+import { Wrapper } from "~/components/Wrapper";
 import { env } from "~/env";
 import {
   Hero,
@@ -20,9 +23,9 @@ const features = [
         <Martini />
       </IconBubble>
     ),
-    title: "Premium Bartenders",
+    title: "Real Bartenders, Not Cater Waiters",
     description:
-      "BAR-certified bartenders with national competition experience. The same craft-cocktail quality you'd expect from Denver's top cocktail bars — delivered to your event.",
+      "Hand-picked from Death & Co, Williams & Graham, Lady Jane, and other top Denver cocktail bars. National competition experience. BAR-certified.",
   },
   {
     icon: (
@@ -30,9 +33,9 @@ const features = [
         <Sparkles />
       </IconBubble>
     ),
-    title: "Custom Cocktail Menus",
+    title: "Custom Menu, Designed for You",
     description:
-      "We design a menu around your event, your guests, and your taste. Signature drinks, classics, and creative mocktails — every pour feels intentional.",
+      "Built around your event, your guests, your vibe. Signature drinks, classics done right, and creative mocktails for non-drinkers.",
   },
   {
     icon: (
@@ -40,9 +43,9 @@ const features = [
         <Users />
       </IconBubble>
     ),
-    title: "Full-Service Setup",
+    title: "Setup to Breakdown",
     description:
-      "We bring the bar, glassware, ice, mixers, garnishes, and tools. You provide the venue and the alcohol — we handle everything else, setup through breakdown.",
+      "We bring the bar, glassware, ice, juices, garnishes, and tools. You bring the venue and the booze (we send a shopping list).",
   },
 ];
 
@@ -50,24 +53,59 @@ const events = [
   {
     title: "Weddings",
     description:
-      "From Denver venues to mountain estates — craft cocktails that match the magic of your day, served by bartenders who won't miss a beat.",
+      "Mountain estates, downtown venues, urban backyards. 50 to 200+ guests. Your guests will text you about the cocktails for weeks.",
     image: "/action-shots/pouring-cocktails.webp",
     alt: "Bartender pouring cocktails at a wedding",
   },
   {
     title: "Corporate Events",
     description:
-      "Holiday parties, client dinners, team celebrations — elevated cocktail service that impresses without the headache of coordinating a caterer plus a bar.",
+      "Holiday parties, executive dinners, team celebrations, brand launches. Cocktails that match the impression you're making.",
     image: "/action-shots/hitch.webp",
     alt: "Professional mobile bar setup for corporate events",
   },
   {
     title: "Private Parties",
     description:
-      "Birthdays, anniversaries, fundraisers, backyard celebrations — the full bar experience in your home so you can actually be a guest at your own party.",
+      "Milestone birthdays, anniversaries, fundraisers. For hosts who care what their guests drink. Minimum 30 guests.",
     image: "/action-shots/james-in-home.webp",
     alt: "Bartender serving cocktails at a private home event",
   },
+];
+
+const comparison = [
+  {
+    label: "Ice",
+    them: "Bagged from the gas station",
+    us: "Hand-cut, large-format, doesn't water down your drink",
+  },
+  {
+    label: "Menu",
+    them: "Vodka soda or vodka cran",
+    us: "Custom menu, signature drinks, creative mocktails",
+  },
+  {
+    label: "Ingredients",
+    them: "Pre-mixed sour mix and grenadine",
+    us: "Fresh juices, house-made syrups, real garnishes",
+  },
+  {
+    label: "Setup",
+    them: "Folding table with a tip jar",
+    us: "Full mobile bar that fits your venue",
+  },
+  {
+    label: "Bartenders",
+    them: "Whoever the caterer found",
+    us: "Hand-picked from Denver's most awarded cocktail bars",
+  },
+];
+
+const pricingFacts = [
+  { value: "$25", label: "Per guest, starting" },
+  { value: "$800", label: "Minimum event" },
+  { value: "3 hrs", label: "Service included" },
+  { value: "$100/hr", label: "Per extra bartender hour" },
 ];
 
 const testimonials = [
@@ -86,7 +124,7 @@ const testimonials = [
   },
   {
     quote:
-      "The team arrived at our Colorado mountain home with their stunningly charming mobile bar. Thoughtful gestures, attention to detail, exceptional service — I'd give 100 stars if I could.",
+      "The team arrived at our Colorado mountain home with their stunningly charming mobile bar. Thoughtful gestures, attention to detail, exceptional service. I'd give 100 stars if I could.",
     name: "Laura Fronapfel",
     role: "Fundraiser · Colorado Mountains",
     image: "/laura.png",
@@ -95,107 +133,200 @@ const testimonials = [
 
 export default function LandingPage() {
   return (
-    <main className="flex min-h-screen flex-col">
+    <main className="flex min-h-screen flex-col overflow-x-clip">
       {/* Navbar */}
       <Navbar
         sticky
         cta={
-          <CalButton arrow buttonId="nav-book-call">
-            Book a Discovery Call
-          </CalButton>
+          <CalButton arrow>Book a 10-Min Call</CalButton>
         }
         className="bg-black/80 text-neutral-100 backdrop-blur-lg"
       />
 
-      {/* Hero — page bg */}
+      {/* Hero */}
       <Hero
-        tagline="Denver Mobile Bar · Weddings · Corporate · Private Events"
+        tagline="Premium Mobile Bartending · Denver & Colorado Mountains"
         heading={
           <>
-            We Bring Everything{" "}
-            <span className="text-primary-300">But the Alcohol</span>
+            You&apos;re not hiring a bartender. You&apos;re hiring{" "}
+            <span className="text-primary-300">
+              the team behind Denver&apos;s best cocktail bars
+            </span>
+            .
           </>
         }
-        description="Professional bartenders, custom cocktail menus, and full-service setup for weddings, corporate events, and private parties across Denver and the Colorado mountains. You provide the venue and the booze — we handle the rest. Book a free discovery call and we'll design your perfect bar experience."
+        description="Hand-cut ice. House-made ingredients. Custom menus designed for your event. Starting at $25 per guest."
         screenshotDescription="Mobile Craft Bars event setup with professional bartenders"
         cta={
-          <CalButton
-            size="lg"
-            arrow
-            className="glow-cta shadow-theme"
-            buttonId="hero-book-call"
-          >
-            Book a Discovery Call
+          <CalButton size="lg" arrow className="glow-cta shadow-theme">
+            Book My 10-Min Discovery Call
           </CalButton>
         }
         image="/action-shots/hitch-lake.webp"
       />
 
-      {/* Social Proof — page bg with lifted pill */}
-      <div className="SocialProofWrapper px-6 pb-16 md:pb-40">
+      {/* Social Proof */}
+      <div className="SocialProofWrapper px-6 pb-16 md:pb-32">
         <SocialProof />
       </div>
 
-      {/* Services — gradient band */}
-      <div id="services">
-        <FeatureGrid
-          heading="Everything You Need for a Perfect Bar"
-          subheading="One team. Turnkey service. So you can actually enjoy your event."
-          features={features}
-          cta={
-            <CalButton
-              size="lg"
-              arrow
-              className="glow-cta shadow-theme w-full md:w-auto"
-              buttonId="services-book-call"
-            >
-              Book a Discovery Call
-            </CalButton>
-          }
-        />
-      </div>
+      {/* Comparison */}
+      <section className="section-pad section-gradient">
+        <div className="mx-auto max-w-[1200px]">
+          <FadeIn>
+            <div className="mx-auto mb-10 max-w-[960px] text-center md:mb-14">
+              <Eyebrow className="mb-3">The Difference</Eyebrow>
+              <h2>
+                Most Event Bartenders vs.{" "}
+                <span className="text-primary-300">Mobile Craft Bars</span>
+              </h2>
+            </div>
+          </FadeIn>
 
-      {/* Event Types — page bg */}
+          <FadeIn delay={150}>
+            <div className="mx-auto max-w-[960px] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+              {/* Header row */}
+              <div className="grid grid-cols-2 border-b border-white/10 md:grid-cols-[180px_1fr_1fr]">
+                <div className="hidden bg-white/[0.06] px-5 py-4 md:block" />
+                <div className="bg-primary-400/40 px-5 py-4 text-center text-base font-semibold text-neutral-100">
+                  Most Event Bartenders
+                </div>
+                <div className="bg-primary-300/40 px-5 py-4 text-center text-base font-semibold text-white">
+                  Mobile Craft Bars
+                </div>
+              </div>
+
+              {comparison.map((row, i) => (
+                <div
+                  key={row.label}
+                  className={`grid grid-cols-2 md:grid-cols-[180px_1fr_1fr] ${
+                    i < comparison.length - 1
+                      ? "border-b border-white/10"
+                      : ""
+                  }`}
+                >
+                  <div className="bg-primary-300/15 col-span-2 flex items-center border-b border-white/10 px-5 py-2 text-xs font-bold tracking-wider text-white uppercase md:col-span-1 md:border-b-0 md:py-3.5 md:text-sm md:tracking-wide md:normal-case">
+                    {row.label}
+                  </div>
+                  <div className="bg-primary-400/15 flex items-center gap-2.5 px-5 py-3.5">
+                    <X className="h-4 w-4 shrink-0 text-white/40" />
+                    <span className="text-sm text-neutral-200">{row.them}</span>
+                  </div>
+                  <div
+                    className={`bg-primary-300/20 border-primary-300/40 flex items-center gap-2.5 border-l px-5 py-3.5 md:border-l ${
+                      i < comparison.length - 1
+                        ? "border-b border-b-primary-300/25"
+                        : ""
+                    }`}
+                  >
+                    <Check className="text-primary-200 h-4 w-4 shrink-0" />
+                    <span className="text-sm font-medium text-white">
+                      {row.us}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Event Types */}
       <div id="events">
         <EventTypes
           eyebrow="Events We Serve"
           heading="Which One Are You Planning?"
-          subheading="Whatever you're celebrating, we've done it — and we'd love to do yours."
           events={events}
           cta={
             <CalButton
               size="lg"
               arrow
               className="glow-cta shadow-theme w-full md:w-auto"
-              buttonId="events-book-call"
             >
-              Book a Discovery Call
+              Plan My Event
             </CalButton>
           }
         />
       </div>
 
-      {/* Testimonials — gradient band */}
-      <Testimonials eyebrow="What Clients Say" testimonials={testimonials} />
+      {/* Features */}
+      <div id="services">
+        <FeatureGrid
+          heading="What You Get When You Book Us"
+          features={features}
+          cta={
+            <CalButton
+              size="lg"
+              arrow
+              className="glow-cta shadow-theme w-full md:w-auto"
+            >
+              Get My Quote
+            </CalButton>
+          }
+        />
+      </div>
 
-      {/* Final CTA — page bg */}
-      <section className="relative px-6 py-20 md:py-28">
+      {/* Pricing / Qualification */}
+      <section className="section-pad" id="pricing">
+        <div className="mx-auto max-w-[1200px]">
+          <FadeIn>
+            <div className="mx-auto mb-10 max-w-[960px] text-center md:mb-14">
+              <Eyebrow className="mb-3">Pricing</Eyebrow>
+              <h2>
+                Starts at{" "}
+                <span className="text-primary-300">$25 per guest</span>
+              </h2>
+            </div>
+          </FadeIn>
+
+          <div className="mx-auto grid max-w-[960px] grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+            {pricingFacts.map((fact, i) => (
+              <FadeIn key={fact.label} delay={i * 80}>
+                <Wrapper
+                  rounded="lg"
+                  padding="sm"
+                  className="flex h-full flex-col items-center border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20 text-center"
+                >
+                  <p className="font-heading text-primary-300 text-3xl font-bold md:text-4xl">
+                    {fact.value}
+                  </p>
+                  <p className="mt-2 text-sm text-neutral-200 md:text-base">
+                    {fact.label}
+                  </p>
+                </Wrapper>
+              </FadeIn>
+            ))}
+          </div>
+
+          <FadeIn delay={400}>
+            <div className="mx-auto mt-8 max-w-[720px] text-center text-sm text-neutral-300 md:text-base">
+              Denver Metro &amp; Colorado mountains. Travel fees apply outside
+              the metro. You bring the booze (we send a shopping list). Best
+              fit for events of 30+ guests.
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <Testimonials
+        eyebrow="What Clients Say"
+        heading="The Drinks They&apos;re Still Talking About"
+        testimonials={testimonials}
+      />
+
+      {/* Final CTA */}
+      <section className="relative overflow-hidden px-6 py-20 md:py-28">
         <div className="gradient-orb bg-primary-300 top-0 -left-32 h-[400px] w-[400px]" />
         <div className="gradient-orb bg-secondary-300 -right-32 bottom-0 h-[300px] w-[300px]" />
-        <div className="relative mx-auto max-w-2xl text-center">
-          <h2 className="mb-4">Ready to Plan Your Event?</h2>
+        <div className="relative mx-auto max-w-[720px] text-center">
+          <h2 className="mb-4">Currently Booking Summer Events</h2>
           <p className="mb-8 text-neutral-200">
-            Book a free 15-minute discovery call. We&apos;ll learn about your
-            event, design your ideal bar experience, and put together a custom
-            quote.
+            Grab a 10-minute call. We&apos;ll design your event and send a
+            custom quote.
           </p>
-          <CalButton
-            size="lg"
-            arrow
-            className="glow-cta shadow-theme"
-            buttonId="footer-cta-book-call"
-          >
-            Book a Discovery Call
+          <CalButton size="lg" arrow className="glow-cta shadow-theme">
+            Reserve My Date
           </CalButton>
         </div>
       </section>
@@ -205,6 +336,18 @@ export default function LandingPage() {
       <Footer
         logo={<span className="text-lg font-bold text-white">{siteName}</span>}
         copyright={`© ${new Date().getFullYear()} ${siteName}. All rights reserved.`}
+        bottomContent={
+          env.NEXT_PUBLIC_PRIVACY_POLICY_URL ? (
+            <a
+              href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-300 text-sm text-gray-300 transition"
+            >
+              Privacy Policy
+            </a>
+          ) : undefined
+        }
         className="text-neutral-200"
       />
     </main>

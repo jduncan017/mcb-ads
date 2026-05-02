@@ -1,27 +1,26 @@
-import { Lexend_Deca, Playfair_Display, Courier_Prime } from "next/font/google";
+import { Inter, Big_Shoulders, Courier_Prime } from "next/font/google";
 
 /*
  * ===========================================
  * FONTS — Mobile Craft Bars brand
  * ===========================================
- * Playfair Display: elegant serif headings (craft cocktail vibe)
- * Lexend Deca: clean sans-serif body
+ * Big Shoulders Display: tall, condensed display headings
+ * Inter: clean sans-serif body
  * Courier Prime: mono accent
  */
 
-// Body font — Lexend Deca Light/Regular/Medium
-export const bodyFont = Lexend_Deca({
+// Body font — Inter (300/400/500)
+export const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body-face",
   weight: ["300", "400", "500"],
 });
 
-// Heading font — Playfair Display, refined serif
-export const headingFont = Playfair_Display({
+// Heading font — Big Shoulders, tall condensed display
+export const headingFont = Big_Shoulders({
   subsets: ["latin"],
   variable: "--font-heading-face",
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["500", "600", "700", "800"],
 });
 
 // Mono/accent font — Courier Prime

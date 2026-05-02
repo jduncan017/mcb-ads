@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { captureServerEvent } from "~/lib/posthog-server";
 
 /**
  * Cal.com webhook handler for booking confirmations.
@@ -50,6 +51,34 @@ export async function POST(request: NextRequest) {
   const responses = inner.responses ?? {};
   const utmSource = getResponseValue(responses.utm_source);
   const fbclid = getResponseValue(responses.fbclid);
+  const eventType = getResponseValue(responses.a1);
+  const guestCount = getResponseValue(responses.a2);
+  const when = getResponseValue(responses.a3);
+  const budget = getResponseValue(responses.a4);
+  const attendeeEmail = inner.attendees?.[0]?.email;
+
+  // PostHog: fire calendly_booked for every confirmed booking (regardless
+  // of attribution). distinct_id is the email hash so it ties to the
+  // visitor's browser-side identity from the modal flow.
+  if (attendeeEmail) {
+    try {
+      const distinctId = await hashSHA256(attendeeEmail.toLowerCase().trim());
+      await captureServerEvent({
+        distinctId,
+        event: "calendly_booked",
+        properties: {
+          eventType,
+          guestCount,
+          when,
+          budget,
+          utm_source: utmSource,
+          fbclid_present: !!fbclid,
+        },
+      });
+    } catch (err) {
+      console.error("[cal-webhook] PostHog capture failed:", err);
+    }
+  }
 
   const isFromMeta =
     fbclid ??
@@ -75,19 +104,18 @@ export async function POST(request: NextRequest) {
   }
 
   const eventTime = Math.floor(Date.now() / 1000);
-  const email = inner.attendees?.[0]?.email;
 
   const eventData = {
     data: [
       {
-        event_name: "Lead",
+        event_name: "Schedule",
         event_time: eventTime,
         action_source: "website",
         user_data: {
           // Include fbc (click ID) only if fbclid was captured
           ...(fbclid && { fbc: `fb.1.${eventTime}.${fbclid}` }),
-          ...(email && {
-            em: [await hashSHA256(email.toLowerCase().trim())],
+          ...(attendeeEmail && {
+            em: [await hashSHA256(attendeeEmail.toLowerCase().trim())],
           }),
         },
       },

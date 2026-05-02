@@ -25,7 +25,7 @@ export function Hero({
       {/* Gradient orb behind hero image */}
       <div className="gradient-orb bg-primary-300 top-1/2 -right-16 hidden h-[500px] w-[500px] -translate-y-1/2 opacity-20 md:block" />
 
-      <div className="relative mx-auto flex max-w-[1200px] flex-col-reverse gap-10 md:items-center md:gap-16 lg:flex-row">
+      <div className="relative mx-auto flex max-w-[1400px] flex-col-reverse gap-10 md:items-center md:gap-12 lg:flex-row">
         {/* Copy */}
         <FadeIn className="flex flex-col items-start gap-6 md:shrink-0 lg:w-5/12">
           <Eyebrow className="hidden md:block">{tagline}</Eyebrow>
@@ -36,14 +36,11 @@ export function Hero({
           </div>
         </FadeIn>
 
-        {/* Product image — extends past container edge on desktop */}
-        <FadeIn
-          delay={200}
-          className="flex min-w-0 flex-1 items-center lg:-mr-32"
-        >
+        {/* Product image */}
+        <FadeIn delay={200} className="flex min-w-0 flex-1 items-center">
           <ProductImage
             src={image}
-            alt={screenshotDescription ?? "FinalBit product interface"}
+            alt={screenshotDescription ?? "Mobile Craft Bars setup"}
             direction="right"
           />
         </FadeIn>

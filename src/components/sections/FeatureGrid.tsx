@@ -30,10 +30,12 @@ export function FeatureGrid({
       <div className="mx-auto max-w-[1200px]">
         {(heading ?? subheading) && (
           <FadeIn>
-            <div className="mb-8 text-center md:mb-12">
+            <div className="mx-auto mb-8 max-w-[960px] text-center md:mb-12">
               {heading && <h2>{heading}</h2>}
               {subheading && (
-                <p className="mt-3 text-neutral-200">{subheading}</p>
+                <p className="mx-auto mt-3 max-w-[720px] text-neutral-200">
+                  {subheading}
+                </p>
               )}
             </div>
           </FadeIn>

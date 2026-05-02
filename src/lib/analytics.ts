@@ -1,48 +1,57 @@
 import { posthog } from "./posthog";
 
 /**
- * Track key conversion events.
- * Call these from onClick handlers and form submissions.
+ * PostHog event capture for the discovery funnel.
  *
  * Funnel structure:
- *   Pageview → pricing_viewed → [B2C] plan_signup_clicked
- *                              → [B2B] cal_modal_opened
+ *   Pageview -> CalButton click -> cal_modal_opened -> modal questions
+ *               -> modal_friction_shown / modal_decline_shown (some users)
+ *               -> lead_submitted -> Calendly redirect -> calendly_booked
+ *
+ * Each CTA button on the page has unique text. cal_modal_opened fires with
+ * `source` = the visible button text, so PostHog funnels and breakdowns can
+ * distinguish hero vs nav vs final-cta performance directly by what users see.
+ *
+ * `calendly_booked` is fired server-side from /api/cal-webhook in lib/posthog-server.ts
+ * because by then the visitor has left the site.
  */
 export const analytics = {
-  // ── Funnel step ──────────────────────────────────────────
-  /** User clicked "View Pricing" — key mid-funnel engagement signal */
-  pricingViewed(source: string) {
-    posthog.capture("pricing_viewed", { source });
-  },
-
-  // ── B2C conversion ───────────────────────────────────────
-  /** User clicked a non-enterprise plan signup (Basic/Creator/Pro) */
-  planSignupClicked(plan: string) {
-    posthog.capture("plan_signup_clicked", {
-      plan,
-      source: "enterprise_page",
-    });
-  },
-
-  // ── B2B conversion ───────────────────────────────────────
-  /** User clicked "Book a Demo" — opens Cal.com booking */
+  /**
+   * Fires when a CalButton click opens the DiscoveryModal.
+   * `source` is the rendered button text (e.g. "Plan My Event").
+   */
   calModalOpened(source: string) {
     posthog.capture("cal_modal_opened", { source });
   },
 
-  // ── Legacy / secondary ───────────────────────────────────
-  /** User selected a path on the old splash page (currently unused — page redirects to /enterprise) */
-  funnelRouted(category: "small-team" | "enterprise", destination: "small-teams" | "enterprise") {
-    posthog.capture("funnel_routed", { team_category: category, destination });
+  /**
+   * Fires when the friction screen is shown (budget = $1k-$1.5k or "Need a recommendation").
+   * Lets us measure how many mid-budget visitors continue vs bail.
+   */
+  modalFrictionShown(source: string) {
+    posthog.capture("modal_friction_shown", { source });
   },
 
-  /** User clicked "Start Free" or submitted the email capture form (unused on /enterprise) */
-  trialStarted(email?: string) {
-    posthog.capture("trial_started", { ...(email && { email }) });
+  /**
+   * Fires when the auto-decline screen is shown (budget = "Under $1,000")
+   * OR when a user hits "Above my budget" on the friction screen.
+   */
+  modalDeclineShown(source: string, reason: "auto" | "friction_no") {
+    posthog.capture("modal_decline_shown", { source, reason });
   },
 
-  /** User submitted the inline demo form (unused on /enterprise — uses CalButton instead) */
-  demoRequested(data?: Record<string, string>) {
-    posthog.capture("demo_requested", data);
+  /**
+   * Fires when /api/discovery-lead has been hit successfully.
+   * `qualified` separates real leads (going to Calendly) from soft-decline notes.
+   */
+  leadSubmitted(props: {
+    source: string;
+    qualified: boolean;
+    eventType?: string;
+    guestCount?: string;
+    when?: string;
+    budget?: string;
+  }) {
+    posthog.capture("lead_submitted", props);
   },
 };

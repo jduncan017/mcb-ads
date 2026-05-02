@@ -30,11 +30,13 @@ export function EventTypes({
       <div className="mx-auto max-w-[1200px]">
         {(eyebrow ?? heading ?? subheading) && (
           <FadeIn>
-            <div className="mb-8 text-center md:mb-12">
+            <div className="mx-auto mb-8 max-w-[960px] text-center md:mb-12">
               {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
               {heading && <h2>{heading}</h2>}
               {subheading && (
-                <p className="mt-3 text-neutral-200">{subheading}</p>
+                <p className="mx-auto mt-3 max-w-[720px] text-neutral-200">
+                  {subheading}
+                </p>
               )}
             </div>
           </FadeIn>
@@ -43,7 +45,7 @@ export function EventTypes({
         <div className="grid items-stretch gap-6 sm:grid-cols-3">
           {events.map((e, i) => (
             <FadeIn key={e.title} delay={i * 100} className="h-full">
-              <div className="card-hover shadow-theme flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+              <div className="card-hover flex h-full flex-col overflow-hidden rounded-2xl border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20">
                 <ProductImage
                   src={e.image}
                   alt={e.alt}
