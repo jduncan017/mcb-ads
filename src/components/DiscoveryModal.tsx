@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  createContext,
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -12,26 +14,25 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, X, Loader2 } from "lucide-react";
 import { usePersistedQueryString } from "~/components/QueryParamProvider";
 import { analytics } from "~/lib/analytics";
-import { env } from "~/env";
+import { stashBookingPrefill } from "~/lib/booking-prefill";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 type EventType = "Wedding" | "Corporate Event" | "Private Party" | "Other";
-type GuestCount = "Under 30" | "30-75" | "75-150" | "150+";
+type GuestCount = "Under 30" | "30 to 75" | "75 to 150" | "150+";
 type WhenAnswer =
-  | "This month"
-  | "Next 60 days"
-  | "This summer"
-  | "Fall or later"
+  | "Within 30 days"
+  | "Between 30 to 60 days"
+  | "Later this year"
+  | "Next year or after"
   | "Not sure yet";
 type Budget =
   | "Under $1,000"
-  | "$1,000-$1,500"
-  | "$1,500-$3,000"
-  | "$3,000-$7,000"
-  | "$7,000+"
+  | "$1,000 to $2,000"
+  | "$2,000 to $5,000"
+  | "$5,000+"
   | "Not sure yet";
 
 type Step =
@@ -55,9 +56,13 @@ interface Answers {
 
 interface DiscoveryModalProps {
   open: boolean;
-  onClose: () => void;
   buttonId?: string;
 }
+
+/** Set by `CalButton` via Provider — avoids non-serializable callback props on this client export. */
+export const DiscoveryModalCloseContext = createContext<(() => void) | null>(
+  null,
+);
 
 // ============================================================================
 // Configuration
@@ -69,24 +74,28 @@ const eventOptions: EventType[] = [
   "Private Party",
   "Other",
 ];
-const guestOptions: GuestCount[] = ["Under 30", "30-75", "75-150", "150+"];
+const guestOptions: GuestCount[] = [
+  "Under 30",
+  "30 to 75",
+  "75 to 150",
+  "150+",
+];
 const whenOptions: WhenAnswer[] = [
-  "This month",
-  "Next 60 days",
-  "This summer",
-  "Fall or later",
+  "Within 30 days",
+  "Between 30 to 60 days",
+  "Later this year",
+  "Next year or after",
   "Not sure yet",
 ];
 const budgetOptions: Budget[] = [
   "Under $1,000",
-  "$1,000-$1,500",
-  "$1,500-$3,000",
-  "$3,000-$7,000",
-  "$7,000+",
+  "$1,000 to $2,000",
+  "$2,000 to $5,000",
+  "$5,000+",
   "Not sure yet",
 ];
 
-const FRICTION_BUDGETS: Budget[] = ["$1,000-$1,500", "Not sure yet"];
+const FRICTION_BUDGETS: Budget[] = ["Not sure yet"];
 const DECLINE_BUDGETS: Budget[] = ["Under $1,000"];
 
 // Steps that count toward progress (5 visible questions)
@@ -96,11 +105,15 @@ const PROGRESS_STEPS: Step[] = ["event", "guests", "when", "budget", "contact"];
 // Component
 // ============================================================================
 
-export function DiscoveryModal({
-  open,
-  onClose,
-  buttonId,
-}: DiscoveryModalProps) {
+export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
+  const closeModalOrNull = useContext(DiscoveryModalCloseContext);
+  if (closeModalOrNull === null) {
+    throw new Error(
+      "DiscoveryModal must be used inside DiscoveryModalCloseContext.Provider",
+    );
+  }
+  const closeModal = closeModalOrNull;
+
   const persistedQs = usePersistedQueryString();
   const [step, setStep] = useState<Step>("event");
   const [answers, setAnswers] = useState<Answers>({});
@@ -124,7 +137,7 @@ export function DiscoveryModal({
   useEffect(() => {
     if (!open) return;
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") closeModal();
     }
     window.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
@@ -132,7 +145,7 @@ export function DiscoveryModal({
       window.removeEventListener("keydown", handleKey);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
+  }, [open, closeModal]);
 
   // ── Step navigation ─────────────────────────────────────────────────────
   const advanceTo = useCallback(
@@ -192,7 +205,10 @@ export function DiscoveryModal({
   );
 
   // ── Friction screen choice ──────────────────────────────────────────────
-  const handleFrictionYes = useCallback(() => advanceTo("contact"), [advanceTo]);
+  const handleFrictionYes = useCallback(
+    () => advanceTo("contact"),
+    [advanceTo],
+  );
   const handleFrictionNo = useCallback(() => {
     analytics.modalDeclineShown(trackingSource, "friction_no");
     advanceTo("decline");
@@ -216,7 +232,8 @@ export function DiscoveryModal({
             email,
             declined: false,
             utm,
-            pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
+            pageUrl:
+              typeof window !== "undefined" ? window.location.href : undefined,
           }),
         });
 
@@ -233,7 +250,11 @@ export function DiscoveryModal({
         // Fire client-side Meta Lead event (browser pixel)
         if (typeof window !== "undefined") {
           const w = window as unknown as {
-            fbq?: (cmd: string, event: string, params?: Record<string, unknown>) => void;
+            fbq?: (
+              cmd: string,
+              event: string,
+              params?: Record<string, unknown>,
+            ) => void;
           };
           w.fbq?.("track", "Lead", {
             content_category: answers.eventType,
@@ -242,21 +263,27 @@ export function DiscoveryModal({
           });
         }
 
-        // Build Calendly URL with prefill
-        const bookingUrl = buildCalendlyUrl({
-          base: env.NEXT_PUBLIC_BOOKING_URL,
+        // Stash the prefill data + a fresh event_id in sessionStorage so /book
+        // can render the Calendly inline widget pre-populated, and so /thank-you
+        // can render personalized confirmation copy. event_id passes through
+        // Calendly via salesforce_uuid so the server-side CAPI Schedule fire
+        // (in cal-webhook) and the client-side Schedule fire (in /book) share
+        // an event_id and Meta dedupes them.
+        stashBookingPrefill({
           name,
           email,
-          answers,
-          persistedQs,
+          eventType: answers.eventType,
+          guestCount: answers.guestCount,
+          when: answers.when,
+          budget: answers.budget,
+          source: trackingSource,
+          utm,
         });
 
-        if (bookingUrl) {
-          window.location.href = bookingUrl;
-        } else {
-          setError("Booking URL not configured. Please contact us directly.");
-          setStep("contact");
-        }
+        // Carry persisted query string through to /book so utm + fbclid stay
+        // in scope for the QueryParamProvider on the next page.
+        const dest = persistedQs ? `/book?${persistedQs}` : "/book";
+        window.location.href = dest;
       } catch (e) {
         console.error(e);
         setError("Something went wrong. Please try again.");
@@ -267,8 +294,7 @@ export function DiscoveryModal({
   );
 
   const submitDecline = useCallback(
-    async (email: string, notes: string) => {
-      setStep("submitting");
+    async (name: string, email: string, notes: string) => {
       try {
         const utm = parseUtm(persistedQs);
         await fetch("/api/discovery-lead", {
@@ -279,11 +305,13 @@ export function DiscoveryModal({
             guestCount: answers.guestCount ?? "n/a",
             when: answers.when ?? "n/a",
             budget: answers.budget ?? "Under $1,000",
+            name,
             email,
             notes,
             declined: true,
             utm,
-            pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
+            pageUrl:
+              typeof window !== "undefined" ? window.location.href : undefined,
           }),
         });
 
@@ -301,7 +329,7 @@ export function DiscoveryModal({
       } catch (e) {
         console.error(e);
         setError("Something went wrong. Please try again.");
-        setStep("decline");
+        throw e;
       }
     },
     [answers, persistedQs, trackingSource],
@@ -318,23 +346,20 @@ export function DiscoveryModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-stretch justify-center sm:items-center sm:p-4"
+      className="fixed inset-0 z-100 flex items-stretch justify-center sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="discovery-title"
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-        onClick={onClose}
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+        onClick={closeModal}
         aria-hidden="true"
       />
 
       {/* Card */}
-      <div
-        style={{ background: "var(--section-gradient)" }}
-        className="relative mx-auto flex h-full w-full max-w-none flex-col overflow-hidden border-gray-400/30 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[92vh] sm:min-h-[480px] sm:max-w-[560px] sm:rounded-2xl sm:border"
-      >
+      <div className="bg-primary-400 relative mx-auto flex h-full w-full max-w-none flex-col overflow-hidden border-gray-400/30 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[92vh] sm:min-h-[480px] sm:max-w-[520px] sm:rounded-2xl sm:border">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <button
@@ -342,32 +367,33 @@ export function DiscoveryModal({
             onClick={goBack}
             disabled={history.length === 0 || step === "submitting"}
             aria-label="Go back"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-200 transition hover:bg-white/10 disabled:opacity-30"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-neutral-200 transition hover:bg-white/40 hover:text-black disabled:opacity-0"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <ProgressDots
             total={PROGRESS_STEPS.length}
             current={progressIndex}
-            faded={step === "friction" || step === "decline" || step === "submitting"}
+            faded={
+              step === "friction" || step === "decline" || step === "submitting"
+            }
           />
           <button
             type="button"
-            onClick={onClose}
+            onClick={closeModal}
             aria-label="Close"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-200 transition hover:bg-white/10"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-neutral-200 transition hover:bg-white/40 hover:text-black"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 flex-col px-6 py-8 sm:px-8 sm:py-10">
+        <div className="flex flex-1 flex-col overflow-y-auto px-6 py-8 sm:px-8 sm:py-10">
           {step === "event" && (
             <ChoiceStep
               title="What Kind of Event Are You Planning?"
               options={eventOptions}
-              selected={answers.eventType}
               onSelect={(v) => selectChoice("eventType", v, "guests")}
             />
           )}
@@ -375,7 +401,6 @@ export function DiscoveryModal({
             <ChoiceStep
               title="How Many Guests?"
               options={guestOptions}
-              selected={answers.guestCount}
               onSelect={(v) => selectChoice("guestCount", v, "when")}
             />
           )}
@@ -383,30 +408,29 @@ export function DiscoveryModal({
             <ChoiceStep
               title="When Is the Event?"
               options={whenOptions}
-              selected={answers.when}
               onSelect={(v) => selectChoice("when", v, "budget")}
             />
           )}
           {step === "budget" && (
             <ChoiceStep
-              title="Realistic Total Bar Budget?"
-              subtitle="We handle the bartending. You handle the alcohol."
+              title="What's Your Total Bar Budget?"
+              subtitle="Including staffing costs and alcohol."
               options={budgetOptions}
-              selected={answers.budget}
               onSelect={handleBudgetChoice}
             />
           )}
           {step === "friction" && (
-            <FrictionStep
-              onYes={handleFrictionYes}
-              onNo={handleFrictionNo}
-            />
+            <FrictionStep onYes={handleFrictionYes} onNo={handleFrictionNo} />
           )}
           {step === "decline" && !submitted && (
-            <DeclineStep error={error} onSubmit={submitDecline} onClose={onClose} />
+            <DeclineStep
+              error={error}
+              onSubmit={submitDecline}
+              onClose={closeModal}
+            />
           )}
           {step === "decline" && submitted && (
-            <DeclineSubmittedStep onClose={onClose} />
+            <DeclineSubmittedStep onClose={closeModal} />
           )}
           {step === "contact" && (
             <ContactStep
@@ -432,53 +456,54 @@ function ChoiceStep<T extends string>({
   title,
   subtitle,
   options,
-  selected,
   onSelect,
 }: {
   title: string;
   subtitle?: string;
   options: readonly T[];
-  selected?: T;
   onSelect: (value: T) => void;
 }) {
   return (
     <div className="flex flex-1 flex-col">
-      <h3 id="discovery-title" className="mb-2 text-2xl tracking-wide">
+      <h3
+        id="discovery-title"
+        className="mb-2 w-full text-center text-2xl tracking-wider"
+      >
         {title}
       </h3>
       {subtitle && (
-        <p className="mb-6 text-sm font-normal tracking-wide text-white/80">
+        <p className="mb-6 w-full text-center text-sm font-normal tracking-wide text-white/90">
           {subtitle}
         </p>
       )}
       {!subtitle && <div className="mb-6" />}
-      <div className="flex flex-col gap-2.5">
-        {options.map((opt) => {
-          const isSelected = selected === opt;
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onSelect(opt)}
-              className={`group focus-visible:ring-primary-300/50 flex items-center justify-between rounded-xl border bg-linear-to-br px-5 py-4 text-left text-base font-medium tracking-wide text-white transition focus:outline-none focus-visible:ring-2 ${
-                isSelected
-                  ? "border-primary-200/60 from-primary-300/30 to-primary-400/30 shadow-[0_0_24px_-8px_rgba(101,144,195,0.5)]"
-                  : "border-gray-400/40 from-gray-200/20 to-gray-600/20 hover:border-primary-200/50 hover:from-primary-300/15 hover:to-primary-400/15"
-              }`}
-            >
-              <span>{opt}</span>
-              <ArrowRight
-                className={`h-4 w-4 transition ${
-                  isSelected
-                    ? "text-primary-100 translate-x-0 opacity-100"
-                    : "text-primary-200/70 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
-                }`}
-              />
-            </button>
-          );
-        })}
+      <div className="flex flex-col gap-4">
+        {options.map((opt) => (
+          <ChoiceButton key={opt} onClick={() => onSelect(opt)}>
+            {opt}
+          </ChoiceButton>
+        ))}
       </div>
     </div>
+  );
+}
+
+function ChoiceButton({
+  onClick,
+  children,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group hover:border-primary-200/50 border-primary-200/15 from-primary-300 to-primary-400 flex cursor-pointer items-center justify-between rounded-xl border bg-linear-to-br px-5 py-4 font-medium tracking-wide text-white transition hover:from-slate-300 hover:to-slate-400/15 hover:text-black"
+    >
+      <span>{children}</span>
+      <ArrowRight className="text-primary-white h-4 w-4 -translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
+    </button>
   );
 }
 
@@ -491,30 +516,20 @@ function FrictionStep({
 }) {
   return (
     <div className="flex flex-1 flex-col">
-      <h3 className="mb-3 text-2xl tracking-wide">A Heads Up on Pricing</h3>
-      <p className="mb-7 text-base leading-relaxed font-normal tracking-wide text-white">
+      <h3 className="mb-2 w-full text-center text-2xl tracking-wider">
+        A Heads Up on Pricing
+      </h3>
+      <p className="mb-6 w-full text-center text-sm font-normal tracking-wide text-white/90">
         Our minimum is{" "}
-        <span className="text-primary-100 font-semibold tracking-wider">
+        <span className="text-primary-100 font-semibold">
           $800 for bartending
         </span>{" "}
-        alone, and you&apos;ll need budget for alcohol on top. Tight, but doable
-        for small events. Still want to chat?
+        alone, plus alcohol on top. Tight, but doable for small events. Still
+        want to chat?
       </p>
-      <div className="flex flex-col gap-2.5">
-        <button
-          type="button"
-          onClick={onYes}
-          className="border-primary-200/60 from-primary-300/30 to-primary-400/30 focus-visible:ring-primary-300/50 rounded-xl border bg-linear-to-br px-5 py-4 text-base font-medium tracking-wide text-white shadow-[0_0_24px_-8px_rgba(101,144,195,0.5)] transition hover:from-primary-300/40 hover:to-primary-400/40 focus:outline-none focus-visible:ring-2"
-        >
-          Yes, that works
-        </button>
-        <button
-          type="button"
-          onClick={onNo}
-          className="from-gray-200/20 to-gray-600/20 hover:border-primary-200/50 rounded-xl border border-gray-400/40 bg-linear-to-br px-5 py-4 text-base font-medium tracking-wide text-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-        >
-          Above my budget
-        </button>
+      <div className="flex flex-col gap-4">
+        <ChoiceButton onClick={onYes}>Yes, that works</ChoiceButton>
+        <ChoiceButton onClick={onNo}>Above my budget</ChoiceButton>
       </div>
     </div>
   );
@@ -603,9 +618,7 @@ function ContactStep({
           error={emailError}
         />
       </div>
-      {error && (
-        <p className="mt-4 text-sm text-rose-400">{error}</p>
-      )}
+      {error && <p className="mt-4 text-sm text-rose-400">{error}</p>}
       <div className="mt-auto flex items-center justify-between pt-8">
         <span className="text-xs tracking-wide text-white/60">
           Press Enter ↵ to continue
@@ -628,38 +641,59 @@ function DeclineStep({
   onClose,
 }: {
   error: string | null;
-  onSubmit: (email: string, notes: string) => void;
+  onSubmit: (name: string, email: string, notes: string) => Promise<void>;
   onClose: () => void;
 }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    emailRef.current?.focus();
+    nameRef.current?.focus();
   }, []);
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    if (submitting) return;
+    if (!name.trim()) {
+      nameRef.current?.focus();
+      return;
+    }
     if (!email.trim() || !isValidEmail(email)) {
       setEmailError("Please enter a valid email");
       emailRef.current?.focus();
       return;
     }
     setEmailError(null);
-    onSubmit(email.trim(), notes.trim());
+    setSubmitting(true);
+    try {
+      await onSubmit(name.trim(), email.trim(), notes.trim());
+    } catch {
+      setSubmitting(false);
+    }
   }
 
   return (
     <div className="flex flex-1 flex-col">
-      <h3 className="mb-3 text-2xl tracking-wide">We May Not Be the Right Fit</h3>
-      <p className="mb-6 text-base leading-relaxed font-normal tracking-wide text-white">
-        We&apos;re typically a fit for events with bar budgets of{" "}
-        <span className="font-semibold tracking-wider">$1,000+</span>. Want to
-        send us a quick note about your event anyway? Sometimes we can make
-        something work.
+      <h3 className="mb-3 w-full text-center text-2xl tracking-wider">
+        We May Not Be the Right Fit
+      </h3>
+      <p className="mb-6 text-center text-base leading-relaxed font-normal tracking-wide text-white">
+        Our minimum is $800 and doesn&apos;t include the cost of alcohol. If
+        you&apos;d still like to reach out you can send us an email below:
       </p>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
+        <ModalInput
+          label="First name"
+          ref={nameRef}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Jane"
+          autoComplete="given-name"
+        />
         <ModalInput
           label="Your email"
           ref={emailRef}
@@ -686,16 +720,25 @@ function DeclineStep({
         <button
           type="button"
           onClick={onClose}
-          className="text-sm tracking-wide text-white/60 transition hover:text-white"
+          disabled={submitting}
+          className="text-sm tracking-wide text-white/60 transition hover:text-white disabled:opacity-50"
         >
-          No thanks, close
+          No thanks
         </button>
         <button
           type="button"
           onClick={handleSubmit}
-          className="bg-primary-300 hover:bg-primary-200 focus-visible:ring-primary-300/50 rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide text-white shadow-[0_0_24px_-4px_rgba(101,144,195,0.6)] transition focus:outline-none focus-visible:ring-2"
+          disabled={submitting}
+          className="bg-primary-300 hover:bg-primary-200 focus-visible:ring-primary-300/50 inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide text-white shadow-[0_0_24px_-4px_rgba(101,144,195,0.6)] transition focus:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Send note →
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Send →"
+          )}
         </button>
       </div>
     </div>
@@ -705,7 +748,9 @@ function DeclineStep({
 function DeclineSubmittedStep({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center text-center">
-      <h3 className="mb-3 text-2xl tracking-wide">Got It, Thanks for Reaching Out</h3>
+      <h3 className="mb-3 text-2xl tracking-wide">
+        Got It, Thanks for Reaching Out
+      </h3>
       <p className="mb-8 max-w-sm text-base font-normal tracking-wide text-white">
         We&apos;ll review your note and get back to you if we can find a way to
         make it work.
@@ -713,7 +758,7 @@ function DeclineSubmittedStep({ onClose }: { onClose: () => void }) {
       <button
         type="button"
         onClick={onClose}
-        className="rounded-full border border-white/15 bg-white/[0.06] px-5 py-2 text-sm font-medium tracking-wide text-white transition hover:bg-white/10"
+        className="rounded-full border border-white/15 bg-white/6 px-5 py-2 text-sm font-medium tracking-wide text-white transition hover:bg-white/10"
       >
         Close
       </button>
@@ -724,7 +769,7 @@ function DeclineSubmittedStep({ onClose }: { onClose: () => void }) {
 function SubmittingStep() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-      <Loader2 className="h-8 w-8 animate-spin text-primary-300" />
+      <Loader2 className="text-primary-300 h-8 w-8 animate-spin" />
       <p className="text-sm tracking-wide text-white/75">
         Sending you to the booking page...
       </p>
@@ -754,8 +799,10 @@ const ModalInput = forwardRef<HTMLInputElement, ModalInputProps>(
         <input
           ref={ref}
           {...rest}
-          className={`focus-visible:ring-primary-300/50 from-gray-200/10 to-gray-600/10 w-full rounded-xl border bg-linear-to-br px-4 py-3.5 text-base font-normal tracking-wide text-white placeholder:font-light placeholder:tracking-wide placeholder:text-white/40 focus:outline-none focus-visible:ring-2 ${
-            error ? "border-rose-400/60" : "border-gray-400/40 focus:border-primary-200/60"
+          className={`w-full rounded-xl border bg-gray-200 px-4 py-3.5 text-base font-normal tracking-wide text-black placeholder:tracking-wide placeholder:text-black/50 focus:outline-none ${
+            error
+              ? "border-rose-400/60"
+              : "focus:border-primary-200/60 border-gray-400/40"
           }`}
         />
         {error && <span className="text-xs text-rose-400">{error}</span>}
@@ -780,8 +827,10 @@ function ModalTextarea({ label, error, ...rest }: ModalTextareaProps) {
       </span>
       <textarea
         {...rest}
-        className={`w-full resize-none rounded-xl border bg-black/30 px-4 py-3 text-base text-white placeholder:text-neutral-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/50 ${
-          error ? "border-rose-400/60" : "border-white/15 focus:border-primary-300/50"
+        className={`placeholder:text-black/50focus:outline-none w-full resize-none rounded-xl border bg-gray-200 px-4 py-3 text-base text-black ${
+          error
+            ? "border-rose-400/60"
+            : "focus:border-primary-300/50 border-white/15"
         }`}
       />
       {error && <span className="text-xs text-rose-400">{error}</span>}
@@ -799,7 +848,9 @@ function ProgressDots({
   faded: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-1.5 transition-opacity ${faded ? "opacity-30" : ""}`}>
+    <div
+      className={`flex items-center gap-1.5 transition-opacity ${faded ? "opacity-30" : ""}`}
+    >
       {Array.from({ length: total }).map((_, i) => {
         const filled = i <= current;
         const active = i === current;
@@ -808,10 +859,10 @@ function ProgressDots({
             key={i}
             className={`h-1.5 rounded-full transition-all ${
               active
-                ? "w-6 bg-primary-300"
+                ? "w-6 bg-orange-200"
                 : filled
-                  ? "w-1.5 bg-primary-300/70"
-                  : "w-1.5 bg-white/15"
+                  ? "w-1.5 bg-orange-200/70"
+                  : "w-1.5 bg-white/70"
             }`}
           />
         );
@@ -837,40 +888,6 @@ function parseUtm(qs: string) {
     campaign: params.get("utm_campaign") ?? undefined,
     fbclid: params.get("fbclid") ?? undefined,
   };
-}
-
-function buildCalendlyUrl({
-  base,
-  name,
-  email,
-  answers,
-  persistedQs,
-}: {
-  base: string | undefined;
-  name: string;
-  email: string;
-  answers: Answers;
-  persistedQs: string;
-}): string | null {
-  if (!base) return null;
-  const url = new URL(base);
-  // Calendly standard prefill
-  url.searchParams.set("name", name);
-  url.searchParams.set("email", email);
-  // Custom questions a1..a4 (configure these in Calendly in this exact order)
-  if (answers.eventType) url.searchParams.set("a1", answers.eventType);
-  if (answers.guestCount) url.searchParams.set("a2", answers.guestCount);
-  if (answers.when) url.searchParams.set("a3", answers.when);
-  if (answers.budget) url.searchParams.set("a4", answers.budget);
-  // Carry through utm/fbclid for attribution
-  if (persistedQs) {
-    const carry = new URLSearchParams(persistedQs);
-    ["utm_source", "utm_medium", "utm_campaign", "fbclid"].forEach((k) => {
-      const v = carry.get(k);
-      if (v && !url.searchParams.has(k)) url.searchParams.set(k, v);
-    });
-  }
-  return url.toString();
 }
 
 export type { DiscoveryModalProps };

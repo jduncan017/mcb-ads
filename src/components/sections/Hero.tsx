@@ -29,7 +29,7 @@ export function Hero({
         {/* Copy */}
         <FadeIn className="flex flex-col items-start gap-6 md:shrink-0 lg:w-5/12">
           <Eyebrow className="hidden md:block">{tagline}</Eyebrow>
-          <h1>{heading}</h1>
+          <h1 className="text-primary-300 capitalize">{heading}</h1>
           <p className="max-w-xl text-neutral-200">{description}</p>
           <div className="mt-4 flex w-full max-w-[520px] flex-col gap-4 sm:w-auto sm:flex-row">
             {cta}

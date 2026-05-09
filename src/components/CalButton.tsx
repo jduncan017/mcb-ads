@@ -1,8 +1,11 @@
 "use client";
 
-import { type ReactNode, useState, useMemo } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { Button } from "~/components/Button";
-import { DiscoveryModal } from "~/components/DiscoveryModal";
+import {
+  DiscoveryModal,
+  DiscoveryModalCloseContext,
+} from "~/components/DiscoveryModal";
 import {
   type ButtonVariant,
   type ButtonSize,
@@ -43,6 +46,7 @@ export function CalButton({
   label,
 }: CalButtonProps) {
   const [open, setOpen] = useState(false);
+  const closeModal = useCallback(() => setOpen(false), []);
 
   const trackingLabel = useMemo(() => {
     if (label) return label;
@@ -52,7 +56,7 @@ export function CalButton({
   }, [label, children]);
 
   return (
-    <>
+    <DiscoveryModalCloseContext.Provider value={closeModal}>
       <Button
         as="button"
         type="button"
@@ -65,11 +69,7 @@ export function CalButton({
       >
         {children}
       </Button>
-      <DiscoveryModal
-        open={open}
-        onClose={() => setOpen(false)}
-        buttonId={trackingLabel}
-      />
-    </>
+      <DiscoveryModal open={open} buttonId={trackingLabel} />
+    </DiscoveryModalCloseContext.Provider>
   );
 }

@@ -1,0 +1,121 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
+import {
+  readBookingPrefill,
+  clearBookingPrefill,
+  type BookingPrefill,
+} from "~/lib/booking-prefill";
+
+export default function ThankYouPage() {
+  const [prefill, setPrefill] = useState<BookingPrefill | null>(null);
+
+  useEffect(() => {
+    const stash = readBookingPrefill();
+    setPrefill(stash);
+    // Clear sessionStorage after we've read it. Prevents a fresh tab
+    // landing on /thank-you from rendering someone else's stale data,
+    // and ensures a hard reload shows the generic confirmation.
+    clearBookingPrefill();
+  }, []);
+
+  const firstName = prefill?.name?.split(" ")[0];
+  const eventDescriptor = describeEvent(prefill);
+
+  return (
+    <main className="bg-neutral-400 flex min-h-screen items-center justify-center px-4 py-12 text-neutral-100">
+      <div className="relative mx-auto w-full max-w-[640px] overflow-hidden rounded-2xl border border-white/10 bg-[#122134] p-8 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] md:p-12">
+        <div className="from-primary-300/20 absolute -top-32 -right-32 h-[300px] w-[300px] rounded-full bg-linear-to-br to-transparent blur-3xl" />
+
+        <div className="relative">
+          <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-300/30">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+
+          <h1 className="font-heading mb-3 text-3xl tracking-wide md:text-4xl">
+            {firstName ? `You're booked, ${firstName}.` : "You're booked."}
+          </h1>
+
+          <p className="mb-6 text-base text-neutral-200 md:text-lg">
+            {eventDescriptor
+              ? `Your ${eventDescriptor} is on the calendar. Check your inbox for the confirmation.`
+              : "Your discovery call is on the calendar. Check your inbox for the confirmation."}
+          </p>
+
+          <div className="border-primary-300/20 mb-8 rounded-xl border bg-white/[0.04] p-5">
+            <p className="text-primary-100 mb-2 text-xs font-semibold tracking-[0.14em] uppercase">
+              What to expect
+            </p>
+            <ul className="space-y-2 text-sm text-neutral-200 md:text-base">
+              <li>
+                A 10-minute call to talk through your event and design the right
+                bar package.
+              </li>
+              <li>
+                We&apos;ll cover menu concepts, ingredients, pricing, and what&apos;s
+                included.
+              </li>
+              <li>
+                After the call, you&apos;ll get a custom quote within 24 hours.
+              </li>
+            </ul>
+          </div>
+
+          <p className="mb-6 text-sm text-neutral-300">
+            Quick prep: if you have specific cocktails in mind, a venue address,
+            or anything unusual about the setup (rooftop, outdoor, multiple
+            stations), jot it down. We&apos;ll talk through it on the call.
+          </p>
+
+          <Link
+            href="/general"
+            className="text-primary-200 hover:text-primary-100 inline-flex items-center text-sm tracking-wide transition"
+          >
+            Back to home
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+/**
+ * Build a short natural-language descriptor of the event for the headline copy.
+ * Examples:
+ *   "Wedding" + "75-150" => "wedding for 75 to 150 guests"
+ *   "Corporate Event"     => "corporate event"
+ *   undefined             => null (caller falls back to generic copy)
+ */
+function describeEvent(prefill: BookingPrefill | null): string | null {
+  if (!prefill?.eventType) return null;
+  const eventLabel = formatEventType(prefill.eventType);
+  if (!prefill.guestCount) return eventLabel;
+  return `${eventLabel} for ${formatGuestCount(prefill.guestCount)}`;
+}
+
+function formatEventType(value: string): string {
+  switch (value) {
+    case "Wedding":
+      return "wedding";
+    case "Corporate Event":
+      return "corporate event";
+    case "Private Party":
+      return "private party";
+    default:
+      return "event";
+  }
+}
+
+function formatGuestCount(value: string): string {
+  // Convert hyphenated ranges like "75-150" to "75 to 150 guests" so
+  // we don't sneak en-dashes back into user-facing copy.
+  if (value === "Under 30") return "under 30 guests";
+  if (value === "150+") return "150+ guests";
+  if (value.includes("-")) {
+    const [low, high] = value.split("-");
+    return `${low} to ${high} guests`;
+  }
+  return `${value} guests`;
+}

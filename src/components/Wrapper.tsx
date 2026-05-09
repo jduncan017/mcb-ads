@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { type RoundedSize, roundedClasses } from "./shared-styles";
 
-type PaddingSize = "xs" | "sm" | "lg";
+type PaddingSize = "xs" | "sm" | "md" | "lg";
 
 interface WrapperProps {
   children: ReactNode;
@@ -15,12 +15,14 @@ interface WrapperProps {
  * Padding scale (mobile → md+):
  *   xs:  8px all              →  8px all
  *   sm:  16px x / 24px y      →  24px all
+ *   md:  20px x / 32px y      →  32px all
  *   lg:  24px x / 40px y      →  40px all
  */
 const paddingClasses: Record<PaddingSize, string> = {
   xs: "p-2",
-  sm: "px-4 py-6 md:p-6",
-  lg: "px-6 py-10 md:p-10",
+  sm: "px-4 py-6",
+  md: "px-5 py-8",
+  lg: "px-6 py-10",
 };
 
 export function Wrapper({

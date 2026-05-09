@@ -1,11 +1,10 @@
-import { Inter, Big_Shoulders, Courier_Prime } from "next/font/google";
+import { Inter, Courier_Prime } from "next/font/google";
 
 /*
  * ===========================================
  * FONTS — Mobile Craft Bars brand
  * ===========================================
- * Big Shoulders Display: tall, condensed display headings
- * Inter: clean sans-serif body
+ * Inter: body + headings (readability-first for funnel)
  * Courier Prime: mono accent
  */
 
@@ -16,8 +15,8 @@ export const bodyFont = Inter({
   weight: ["300", "400", "500"],
 });
 
-// Heading font — Big Shoulders, tall condensed display
-export const headingFont = Big_Shoulders({
+// Heading font — Inter (heavier weights for distinction)
+export const headingFont = Inter({
   subsets: ["latin"],
   variable: "--font-heading-face",
   weight: ["500", "600", "700", "800"],

@@ -63,14 +63,11 @@ export function Testimonials({
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-none"
+            className="scrollbar-none flex snap-x snap-mandatory gap-4 overflow-x-auto"
             style={{ scrollbarWidth: "none" }}
           >
             {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className="w-full shrink-0 snap-center"
-              >
+              <div key={t.name} className="w-full shrink-0 snap-center">
                 <TestimonialCard testimonial={t} />
               </div>
             ))}
@@ -80,9 +77,7 @@ export function Testimonials({
             <button
               onClick={() => scrollTo(Math.max(0, activeIdx - 1))}
               className={`flex h-8 w-8 items-center justify-center rounded-full border border-gray-200/20 transition ${
-                activeIdx === 0
-                  ? "opacity-30"
-                  : "opacity-100 active:scale-95"
+                activeIdx === 0 ? "opacity-30" : "opacity-100 active:scale-95"
               }`}
               aria-label="Previous testimonial"
             >
@@ -95,7 +90,7 @@ export function Testimonials({
                   onClick={() => scrollTo(i)}
                   className={`h-2 rounded-full transition-all ${
                     i === activeIdx
-                      ? "w-6 bg-primary-300"
+                      ? "bg-primary-300 w-6"
                       : "w-2 bg-neutral-300/40"
                   }`}
                   aria-label={`Go to testimonial ${i + 1}`}
@@ -126,10 +121,10 @@ function TestimonialCard({ testimonial: t }: { testimonial: Testimonial }) {
   return (
     <Wrapper
       rounded="lg"
-      padding="sm"
+      padding="md"
       className="card-hover flex h-full flex-col border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20"
     >
-      <p className="text-xl leading-relaxed font-light text-neutral-200">
+      <p className="text-xl leading-relaxed font-light text-neutral-100">
         &ldquo;{t.quote}&rdquo;
       </p>
       <div className="mt-auto flex items-center gap-3 pt-8">

@@ -23,9 +23,9 @@ const features = [
         <Martini />
       </IconBubble>
     ),
-    title: "Real Bartenders, Not Cater Waiters",
+    title: "Expert Mixologists",
     description:
-      "Hand-picked from Death & Co, Williams & Graham, Lady Jane, and other top Denver cocktail bars. National competition experience. BAR-certified.",
+      "Hand-picked from award winning cocktail bars. Skilled, passionate, and dedicated to hospitality.",
   },
   {
     icon: (
@@ -35,7 +35,7 @@ const features = [
     ),
     title: "Custom Menu, Designed for You",
     description:
-      "Built around your event, your guests, your vibe. Signature drinks, classics done right, and creative mocktails for non-drinkers.",
+      "Built around your event, your guests, your vibe. Signature drinks, classics, & creative mocktails.",
   },
   {
     icon: (
@@ -43,9 +43,9 @@ const features = [
         <Users />
       </IconBubble>
     ),
-    title: "Setup to Breakdown",
+    title: "Next Level Service",
     description:
-      "We bring the bar, glassware, ice, juices, garnishes, and tools. You bring the venue and the booze (we send a shopping list).",
+      "From planning to cleanup, we set the bar high. We pride ourselves on providing a memorable experience.",
   },
 ];
 
@@ -53,21 +53,21 @@ const events = [
   {
     title: "Weddings",
     description:
-      "Mountain estates, downtown venues, urban backyards. 50 to 200+ guests. Your guests will text you about the cocktails for weeks.",
+      "Mountain estates, downtown venues, urban backyards. Your guests will text you about the cocktails for weeks.",
     image: "/action-shots/pouring-cocktails.webp",
     alt: "Bartender pouring cocktails at a wedding",
   },
   {
     title: "Corporate Events",
     description:
-      "Holiday parties, executive dinners, team celebrations, brand launches. Cocktails that match the impression you're making.",
+      "Holiday parties, team celebrations, brand launches. Cocktails that match the impression you're making.",
     image: "/action-shots/hitch.webp",
     alt: "Professional mobile bar setup for corporate events",
   },
   {
     title: "Private Parties",
     description:
-      "Milestone birthdays, anniversaries, fundraisers. For hosts who care what their guests drink. Minimum 30 guests.",
+      "Birthdays, anniversaries, fundraisers. For hosts who want to make a statement.",
     image: "/action-shots/james-in-home.webp",
     alt: "Bartender serving cocktails at a private home event",
   },
@@ -77,17 +77,17 @@ const comparison = [
   {
     label: "Ice",
     them: "Bagged from the gas station",
-    us: "Hand-cut, large-format, doesn't water down your drink",
+    us: "Large cubes that don't water down your drink",
   },
   {
     label: "Menu",
     them: "Vodka soda or vodka cran",
-    us: "Custom menu, signature drinks, creative mocktails",
+    us: "Custom menus, signature drinks & mocktails",
   },
   {
     label: "Ingredients",
-    them: "Pre-mixed sour mix and grenadine",
-    us: "Fresh juices, house-made syrups, real garnishes",
+    them: "Sour mix and store-bought grenadine",
+    us: "Fresh juices and quality house-made syrups",
   },
   {
     label: "Setup",
@@ -96,16 +96,15 @@ const comparison = [
   },
   {
     label: "Bartenders",
-    them: "Whoever the caterer found",
-    us: "Hand-picked from Denver's most awarded cocktail bars",
+    them: "Hired from craigslist",
+    us: "Hand-picked from award-winning cocktail bars",
   },
 ];
 
 const pricingFacts = [
-  { value: "$25", label: "Per guest, starting" },
-  { value: "$800", label: "Minimum event" },
+  { value: "$800", label: "Minimum event cost" },
   { value: "3 hrs", label: "Service included" },
-  { value: "$100/hr", label: "Per extra bartender hour" },
+  { value: "$100/hr", label: "Each exta hour, per bartender" },
 ];
 
 const testimonials = [
@@ -137,29 +136,26 @@ export default function LandingPage() {
       {/* Navbar */}
       <Navbar
         sticky
-        cta={
-          <CalButton arrow>Book a 10-Min Call</CalButton>
-        }
+        cta={<CalButton arrow>Book a 10-Min Call</CalButton>}
         className="bg-black/80 text-neutral-100 backdrop-blur-lg"
       />
 
       {/* Hero */}
       <Hero
-        tagline="Premium Mobile Bartending · Denver & Colorado Mountains"
+        tagline="Premium Mobile Bartending · Colorado Front Range"
         heading={
           <>
-            You&apos;re not hiring a bartender. You&apos;re hiring{" "}
-            <span className="text-primary-300">
-              the team behind Denver&apos;s best cocktail bars
+            Not just bartenders. <br />
+            <span className="text-white">
+              We&apos;re the team behind Denver&apos;s best cocktail bars.
             </span>
-            .
           </>
         }
         description="Hand-cut ice. House-made ingredients. Custom menus designed for your event. Starting at $25 per guest."
         screenshotDescription="Mobile Craft Bars event setup with professional bartenders"
         cta={
           <CalButton size="lg" arrow className="glow-cta shadow-theme">
-            Book My 10-Min Discovery Call
+            Book a 10-Min Discovery Call
           </CalButton>
         }
         image="/action-shots/hitch-lake.webp"
@@ -177,8 +173,8 @@ export default function LandingPage() {
             <div className="mx-auto mb-10 max-w-[960px] text-center md:mb-14">
               <Eyebrow className="mb-3">The Difference</Eyebrow>
               <h2>
-                Most Event Bartenders vs.{" "}
-                <span className="text-primary-300">Mobile Craft Bars</span>
+                Catering Teams vs.{" "}
+                <span className="text-primary-200">Mobile Craft Bars</span>
               </h2>
             </div>
           </FadeIn>
@@ -187,9 +183,9 @@ export default function LandingPage() {
             <div className="mx-auto max-w-[960px] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               {/* Header row */}
               <div className="grid grid-cols-2 border-b border-white/10 md:grid-cols-[180px_1fr_1fr]">
-                <div className="hidden bg-white/[0.06] px-5 py-4 md:block" />
+                <div className="hidden bg-white/6 px-5 py-4 md:block" />
                 <div className="bg-primary-400/40 px-5 py-4 text-center text-base font-semibold text-neutral-100">
-                  Most Event Bartenders
+                  Catering Teams
                 </div>
                 <div className="bg-primary-300/40 px-5 py-4 text-center text-base font-semibold text-white">
                   Mobile Craft Bars
@@ -199,27 +195,25 @@ export default function LandingPage() {
               {comparison.map((row, i) => (
                 <div
                   key={row.label}
-                  className={`grid grid-cols-2 md:grid-cols-[180px_1fr_1fr] ${
-                    i < comparison.length - 1
-                      ? "border-b border-white/10"
-                      : ""
+                  className={`grid grid-cols-2 md:h-20 md:grid-cols-[180px_1fr_1fr] ${
+                    i < comparison.length - 1 ? "border-b border-white/10" : ""
                   }`}
                 >
-                  <div className="bg-primary-300/15 col-span-2 flex items-center border-b border-white/10 px-5 py-2 text-xs font-bold tracking-wider text-white uppercase md:col-span-1 md:border-b-0 md:py-3.5 md:text-sm md:tracking-wide md:normal-case">
+                  <div className="bg-primary-300/40 col-span-2 flex items-center border-b border-white/10 px-5 py-2 text-xs font-bold tracking-wider text-white uppercase md:col-span-1 md:justify-center md:border-b-0 md:py-3.5 md:text-sm md:tracking-wider md:capitalize">
                     {row.label}
                   </div>
-                  <div className="bg-primary-400/15 flex items-center gap-2.5 px-5 py-3.5">
-                    <X className="h-4 w-4 shrink-0 text-white/40" />
+                  <div className="bg-primary-800/15 flex items-center gap-2.5 px-5 py-3.5">
+                    <X className="h-4 w-4 shrink-0 text-red-300/80" />
                     <span className="text-sm text-neutral-200">{row.them}</span>
                   </div>
                   <div
-                    className={`bg-primary-300/20 border-primary-300/40 flex items-center gap-2.5 border-l px-5 py-3.5 md:border-l ${
+                    className={`bg-primary-300/20 border-primary-300/10 flex items-center gap-2.5 border-l px-5 py-3.5 md:border-l ${
                       i < comparison.length - 1
-                        ? "border-b border-b-primary-300/25"
+                        ? "border-b-primary-300/25 border-b"
                         : ""
                     }`}
                   >
-                    <Check className="text-primary-200 h-4 w-4 shrink-0" />
+                    <Check className="h-4 w-4 shrink-0 text-green-300/80" />
                     <span className="text-sm font-medium text-white">
                       {row.us}
                     </span>
@@ -273,18 +267,18 @@ export default function LandingPage() {
             <div className="mx-auto mb-10 max-w-[960px] text-center md:mb-14">
               <Eyebrow className="mb-3">Pricing</Eyebrow>
               <h2>
-                Starts at{" "}
-                <span className="text-primary-300">$25 per guest</span>
+                Starting at{" "}
+                <span className="text-primary-300 italic">$25 per guest</span>
               </h2>
             </div>
           </FadeIn>
 
-          <div className="mx-auto grid max-w-[960px] grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+          <div className="mx-auto grid max-w-[960px] grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
             {pricingFacts.map((fact, i) => (
               <FadeIn key={fact.label} delay={i * 80}>
                 <Wrapper
                   rounded="lg"
-                  padding="sm"
+                  padding="md"
                   className="flex h-full flex-col items-center border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20 text-center"
                 >
                   <p className="font-heading text-primary-300 text-3xl font-bold md:text-4xl">
@@ -299,10 +293,9 @@ export default function LandingPage() {
           </div>
 
           <FadeIn delay={400}>
-            <div className="mx-auto mt-8 max-w-[720px] text-center text-sm text-neutral-300 md:text-base">
-              Denver Metro &amp; Colorado mountains. Travel fees apply outside
-              the metro. You bring the booze (we send a shopping list). Best
-              fit for events of 30+ guests.
+            <div className="mx-auto mt-8 max-w-[720px] text-center text-sm leading-loose text-neutral-200/80 italic md:text-base">
+              Travel fees apply outside Denver metro. <br /> We provide
+              everything except the booze (we send a shopping list).
             </div>
           </FadeIn>
         </div>
@@ -311,7 +304,7 @@ export default function LandingPage() {
       {/* Testimonials */}
       <Testimonials
         eyebrow="What Clients Say"
-        heading="The Drinks They&apos;re Still Talking About"
+        heading="They're still talking about the drinks"
         testimonials={testimonials}
       />
 
