@@ -180,6 +180,7 @@ async function fireMetaLeadEvent(
   const eventTime = Math.floor(Date.now() / 1000);
   const emailHash = await hashSHA256(payload.email.toLowerCase().trim());
 
+  const testEventCode = process.env.META_TEST_EVENT_CODE;
   const eventData = {
     data: [
       {
@@ -198,6 +199,7 @@ async function fireMetaLeadEvent(
         },
       },
     ],
+    ...(testEventCode && { test_event_code: testEventCode }),
   };
 
   const res = await fetch(

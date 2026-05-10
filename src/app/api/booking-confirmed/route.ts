@@ -120,6 +120,7 @@ export async function POST(request: NextRequest) {
   }
 
   const eventTime = Math.floor(Date.now() / 1000);
+  const testEventCode = process.env.META_TEST_EVENT_CODE;
   const eventData = {
     data: [
       {
@@ -143,6 +144,7 @@ export async function POST(request: NextRequest) {
         },
       },
     ],
+    ...(testEventCode && { test_event_code: testEventCode }),
   };
 
   try {
