@@ -17,7 +17,7 @@ export function SocialProof() {
       </FadeIn>
       <div className="mx-auto flex w-full max-w-[800px] flex-col justify-between gap-6 md:flex-row md:gap-8">
         {stats.map((stat, i) => (
-          <FadeIn key={stat.label} delay={i * 100}>
+          <FadeIn key={stat.value} delay={i * 100}>
             <div className="text-center">
               <p className="font-heading text-2xl font-bold text-white md:text-2xl lg:text-3xl">
                 {stat.value}
