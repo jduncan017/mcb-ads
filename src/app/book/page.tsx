@@ -210,10 +210,10 @@ export default function BookPage() {
         <div className="gradient-orb bg-primary-300 -top-32 -left-32 h-[500px] w-[500px]" />
         <div className="gradient-orb bg-secondary-300 top-[40%] -right-32 h-[400px] w-[400px]" />
 
-        <div className="relative mx-auto w-full max-w-[1100px] px-6 py-10 md:py-14">
+        <div className="relative mx-auto w-full max-w-[1100px] py-10 md:py-14">
           {/* Centered intro */}
           <FadeIn>
-            <div className="mx-auto mb-6 max-w-[720px] text-center md:mb-8">
+            <div className="mx-auto mb-6 max-w-[720px] px-6 text-center md:mb-8">
               <Eyebrow>Final Step</Eyebrow>
               <h1 className="font-heading mt-3 mb-4 text-4xl tracking-wide md:text-5xl">
                 {firstName ? `Almost there, ${firstName}.` : "Pick a Time That Works"}
