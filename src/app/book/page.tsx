@@ -57,7 +57,7 @@ const CALENDLY_SCRIPT_SRC = "https://assets.calendly.com/assets/external/widget.
 // - "Enter Details" form (~850px content with terms text + submit button) fits
 const WIDGET_HEIGHT = 900;
 
-const siteName = env.NEXT_PUBLIC_SITE_NAME ?? "Mobile Craft Bars";
+const siteName = "Mobile Craft Bars";
 
 export default function BookPage() {
   const containerRef = useRef<HTMLDivElement>(null);

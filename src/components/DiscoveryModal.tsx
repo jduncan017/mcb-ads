@@ -359,7 +359,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
       />
 
       {/* Card */}
-      <div className="sm:bg-primary-400 relative mx-auto flex h-full w-full max-w-none flex-col items-center overflow-hidden border-gray-400/30 bg-slate-800 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[92vh] sm:min-h-[480px] sm:max-w-[520px] sm:rounded-2xl sm:border">
+      <div className="sm:bg-primary-400 relative mx-auto flex h-full w-full max-w-none flex-col overflow-hidden border-gray-400/30 bg-slate-800 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[92vh] sm:min-h-[480px] sm:max-w-[520px] sm:rounded-2xl sm:border">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between border-b border-white/10 px-5 py-4 sm:mb-0">
           <button

@@ -44,23 +44,39 @@ export default function ThankYouPage() {
               : "Your discovery call is on the calendar. Check your inbox for the confirmation."}
           </p>
 
-          <div className="border-primary-300/20 mb-8 rounded-xl border bg-white/[0.04] p-5">
-            <p className="text-primary-100 mb-2 text-xs font-semibold tracking-[0.14em] uppercase">
+          <div className="border-primary-300/20 mb-8 rounded-xl border bg-white/[0.04] p-5 md:p-6">
+            <p className="text-primary-100 mb-4 text-xs font-semibold tracking-[0.14em] uppercase">
               What to expect
             </p>
-            <ul className="space-y-2 text-sm text-neutral-200 md:text-base">
-              <li>
-                A 10-minute call to talk through your event and design the right
-                bar package.
+            <ol className="space-y-4 text-sm leading-relaxed text-neutral-100 md:text-base">
+              <li className="flex gap-3">
+                <span className="bg-primary-300/20 text-primary-100 ring-primary-300/40 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1">
+                  1
+                </span>
+                <span>
+                  A 10-minute call to talk through your event and design the
+                  right bar package.
+                </span>
               </li>
-              <li>
-                We&apos;ll cover menu concepts, ingredients, pricing, and what&apos;s
-                included.
+              <li className="flex gap-3">
+                <span className="bg-primary-300/20 text-primary-100 ring-primary-300/40 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1">
+                  2
+                </span>
+                <span>
+                  We&apos;ll cover menu concepts, ingredients, pricing, and
+                  what&apos;s included.
+                </span>
               </li>
-              <li>
-                After the call, you&apos;ll get a custom quote within 24 hours.
+              <li className="flex gap-3">
+                <span className="bg-primary-300/20 text-primary-100 ring-primary-300/40 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1">
+                  3
+                </span>
+                <span>
+                  After the call, you&apos;ll get a custom quote within 24
+                  hours.
+                </span>
               </li>
-            </ul>
+            </ol>
           </div>
 
           <p className="mb-6 text-sm text-neutral-300">

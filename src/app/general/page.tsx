@@ -1,76 +1,33 @@
-import { Martini, Sparkles, Users, X, Check } from "lucide-react";
-import { IconBubble } from "~/components/IconBubble";
+import {
+  X,
+  Check,
+  Heart,
+  Briefcase,
+  PartyPopper,
+  Martini,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Navbar, Footer } from "~/components/layout";
 import { CalButton } from "~/components/CalButton";
 import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 import { Wrapper } from "~/components/Wrapper";
 import { env } from "~/env";
-import {
-  Hero,
-  FeatureGrid,
-  EventTypes,
-  SocialProof,
-  Testimonials,
-} from "~/components/sections";
+import { Hero, SocialProof, Testimonials } from "~/components/sections";
 
-const siteName = env.NEXT_PUBLIC_SITE_NAME ?? "Mobile Craft Bars";
+const siteName = "Mobile Craft Bars";
 
-const features = [
-  {
-    icon: (
-      <IconBubble size="sm">
-        <Martini />
-      </IconBubble>
-    ),
-    title: "Expert Mixologists",
-    description:
-      "Hand-picked from award winning cocktail bars. Skilled, passionate, and dedicated to hospitality.",
-  },
-  {
-    icon: (
-      <IconBubble size="sm">
-        <Sparkles />
-      </IconBubble>
-    ),
-    title: "Custom Menu, Designed for You",
-    description:
-      "Built around your event, your guests, your vibe. Signature drinks, classics, & creative mocktails.",
-  },
-  {
-    icon: (
-      <IconBubble size="sm">
-        <Users />
-      </IconBubble>
-    ),
-    title: "Next Level Service",
-    description:
-      "From planning to cleanup, we set the bar high. We pride ourselves on providing a memorable experience.",
-  },
+const eventTypes = [
+  { icon: Heart, label: "Weddings", note: "Mountain estates to downtown venues" },
+  { icon: Briefcase, label: "Corporate Events", note: "Holiday parties, brand launches" },
+  { icon: PartyPopper, label: "Private Parties", note: "Birthdays, anniversaries, fundraisers" },
 ];
 
-const events = [
-  {
-    title: "Weddings",
-    description:
-      "Mountain estates, downtown venues, urban backyards. Your guests will text you about the cocktails for weeks.",
-    image: "/action-shots/pouring-cocktails.webp",
-    alt: "Bartender pouring cocktails at a wedding",
-  },
-  {
-    title: "Corporate Events",
-    description:
-      "Holiday parties, team celebrations, brand launches. Cocktails that match the impression you're making.",
-    image: "/action-shots/hitch.webp",
-    alt: "Professional mobile bar setup for corporate events",
-  },
-  {
-    title: "Private Parties",
-    description:
-      "Birthdays, anniversaries, fundraisers. For hosts who want to make a statement.",
-    image: "/action-shots/james-in-home.webp",
-    alt: "Bartender serving cocktails at a private home event",
-  },
+const included = [
+  { icon: Martini, label: "Expert Mixologists", note: "Hand-picked from award-winning bars" },
+  { icon: Sparkles, label: "Custom Menu", note: "Designed around your event and guests" },
+  { icon: Users, label: "Full-Service Setup", note: "From planning to cleanup, we handle it" },
 ];
 
 const comparison = [
@@ -166,6 +123,64 @@ export default function LandingPage() {
         <SocialProof />
       </div>
 
+      {/* Built for You — combined Events + What's Included */}
+      <section className="section-pad">
+        <div className="mx-auto max-w-[1100px]">
+          <FadeIn>
+            <div className="mx-auto mb-10 max-w-[720px] text-center md:mb-14">
+              <Eyebrow className="mb-3">Built for You</Eyebrow>
+              <h2>Who We Serve, What You Get</h2>
+            </div>
+          </FadeIn>
+          <div className="mx-auto grid max-w-[960px] gap-6 md:grid-cols-2 md:gap-10">
+            <FadeIn delay={100}>
+              <Wrapper
+                rounded="lg"
+                padding="md"
+                className="h-full border border-white/10 bg-linear-to-br from-white/[0.04] to-white/[0.01]"
+              >
+                <p className="text-primary-200 mb-5 text-xs font-semibold tracking-[0.14em] uppercase">
+                  Events We Serve
+                </p>
+                <ul className="space-y-4">
+                  {eventTypes.map(({ icon: Icon, label, note }) => (
+                    <li key={label} className="flex items-start gap-3">
+                      <Icon className="text-primary-200 mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <p className="font-semibold text-white">{label}</p>
+                        <p className="text-sm text-neutral-300">{note}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </Wrapper>
+            </FadeIn>
+            <FadeIn delay={200}>
+              <Wrapper
+                rounded="lg"
+                padding="md"
+                className="h-full border border-white/10 bg-linear-to-br from-white/[0.04] to-white/[0.01]"
+              >
+                <p className="text-primary-200 mb-5 text-xs font-semibold tracking-[0.14em] uppercase">
+                  What You Get
+                </p>
+                <ul className="space-y-4">
+                  {included.map(({ icon: Icon, label, note }) => (
+                    <li key={label} className="flex items-start gap-3">
+                      <Icon className="text-primary-200 mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <p className="font-semibold text-white">{label}</p>
+                        <p className="text-sm text-neutral-300">{note}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </Wrapper>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
       {/* Comparison */}
       <section className="section-pad section-gradient">
         <div className="mx-auto max-w-[1200px]">
@@ -224,41 +239,6 @@ export default function LandingPage() {
           </FadeIn>
         </div>
       </section>
-
-      {/* Event Types */}
-      <div id="events">
-        <EventTypes
-          eyebrow="Events We Serve"
-          heading="Which One Are You Planning?"
-          events={events}
-          cta={
-            <CalButton
-              size="lg"
-              arrow
-              className="glow-cta shadow-theme w-full md:w-auto"
-            >
-              Plan My Event
-            </CalButton>
-          }
-        />
-      </div>
-
-      {/* Features */}
-      <div id="services">
-        <FeatureGrid
-          heading="What You Get When You Book Us"
-          features={features}
-          cta={
-            <CalButton
-              size="lg"
-              arrow
-              className="glow-cta shadow-theme w-full md:w-auto"
-            >
-              Get My Quote
-            </CalButton>
-          }
-        />
-      </div>
 
       {/* Pricing / Qualification */}
       <section className="section-pad" id="pricing">
