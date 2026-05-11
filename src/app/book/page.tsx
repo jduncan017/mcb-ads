@@ -52,10 +52,11 @@ const CALENDLY_THEME_PARAMS = {
 };
 
 const CALENDLY_SCRIPT_SRC = "https://assets.calendly.com/assets/external/widget.js";
-// 900px fits both Calendly views with minimal empty space:
-// - Calendar selection (~650px content) leaves a small gap at the bottom
-// - "Enter Details" form (~850px content with terms text + submit button) fits
-const WIDGET_HEIGHT = 900;
+// Height tuned per breakpoint so Calendly never needs internal scroll:
+// - Desktop: 900px fits Calendar select (~650px) and Enter Details (~850px)
+// - Mobile: form fields stack vertically, terms text wraps, prefilled QA rows
+//   stack — total runs ~1250px. Use 1300 for buffer.
+const WIDGET_HEIGHT_CLASS = "h-[1300px] sm:h-[900px]";
 
 const siteName = "Mobile Craft Bars";
 
@@ -228,8 +229,8 @@ export default function BookPage() {
           {/* Calendly widget */}
           <FadeIn delay={150}>
             <div
-              className="relative mx-auto"
-              style={{ minWidth: 320, height: WIDGET_HEIGHT }}
+              className={`relative mx-auto ${WIDGET_HEIGHT_CLASS}`}
+              style={{ minWidth: 320 }}
             >
               <div
                 className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-500 ${
@@ -250,7 +251,8 @@ export default function BookPage() {
               */}
               <div
                 ref={containerRef}
-                style={{ minWidth: 320, height: WIDGET_HEIGHT }}
+                className={WIDGET_HEIGHT_CLASS}
+                style={{ minWidth: 320 }}
               />
             </div>
           </FadeIn>

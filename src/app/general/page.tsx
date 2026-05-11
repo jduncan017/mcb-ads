@@ -253,7 +253,7 @@ export default function LandingPage() {
             </div>
           </FadeIn>
 
-          <div className="mx-auto grid max-w-[960px] grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+          <div className="mx-auto grid max-w-[960px] grid-cols-2 gap-4 [&>*:last-child]:col-span-2 [&>*:last-child]:mx-auto [&>*:last-child]:w-[calc(50%-0.5rem)] md:grid-cols-3 md:gap-6 md:[&>*:last-child]:col-span-1 md:[&>*:last-child]:w-auto">
             {pricingFacts.map((fact, i) => (
               <FadeIn key={fact.label} delay={i * 80}>
                 <Wrapper
