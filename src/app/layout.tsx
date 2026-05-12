@@ -6,6 +6,7 @@ import { bodyFont, headingFont, monoFont } from "~/fonts";
 import { env } from "~/env";
 import { PostHogProvider } from "~/components/PostHogProvider";
 import { MetaPixel } from "~/components/MetaPixel";
+import { GoogleAdsTag } from "~/components/GoogleAdsTag";
 import { QueryParamProvider } from "~/components/QueryParamProvider";
 
 const metaVerification = env.NEXT_PUBLIC_META_DOMAIN_VERIFICATION;
@@ -34,6 +35,7 @@ export default function RootLayout({
           />
         )}
         <MetaPixel />
+        <GoogleAdsTag />
       </head>
       <body className="font-body min-h-screen bg-neutral-400 leading-normal text-neutral-100">
         <Suspense>

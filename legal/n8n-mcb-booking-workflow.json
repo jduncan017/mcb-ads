@@ -1,0 +1,249 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5feb276c-4596-448b-b307-834b4f66410d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -5152,
+        192
+      ],
+      "id": "0fd1ffd9-d64d-4a92-b76b-5c16105eb131",
+      "name": "Webhook",
+      "webhookId": "5feb276c-4596-448b-b307-834b4f66410d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "customerName",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "customerFirstName",
+              "value": "={{ ($json.body.name || '').split(' ')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "customerEmail",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "eventType",
+              "value": "={{ $json.body.eventType }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "guestCount",
+              "value": "={{ $json.body.guestCount }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "bookingWhen",
+              "value": "={{ $json.body.when }}",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "budget",
+              "value": "={{ $json.body.budget }}",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "ctaSource",
+              "value": "={{ $json.body.source }}",
+              "type": "string"
+            },
+            {
+              "id": "id-9",
+              "name": "trafficSource",
+              "value": "={{ $json.body.utm?.source ?? 'direct' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "campaign",
+              "value": "={{ $json.body.utm?.campaign ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-11",
+              "name": "hasFbclid",
+              "value": "={{ !!$json.body.utm?.fbclid }}",
+              "type": "boolean"
+            },
+            {
+              "id": "id-12",
+              "name": "eventId",
+              "value": "={{ $json.body.eventId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "86188bde-6254-48a6-89f2-c650054f5286",
+      "name": "Extract Booking Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4928,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#mobile-craft-bars",
+          "mode": "name"
+        },
+        "text": "=:cocktail: *New MCB discovery call booked!*\n\n*{{ $('Extract Booking Data').item.json.customerName }}* booked a call for their *{{ $('Extract Booking Data').item.json.eventType }}* ({{ $('Extract Booking Data').item.json.guestCount }} guests)\n\n• Budget: {{ $('Extract Booking Data').item.json.budget }}\n• Timing: {{ $('Extract Booking Data').item.json.bookingWhen }}\n• Email: {{ $('Extract Booking Data').item.json.customerEmail }}\n• Traffic: {{ $('Extract Booking Data').item.json.trafficSource }}{{ $('Extract Booking Data').item.json.campaign ? ' / ' + $('Extract Booking Data').item.json.campaign : '' }}\n• CTA: {{ $('Extract Booking Data').item.json.ctaSource }}\n• fbclid: {{ $('Extract Booking Data').item.json.hasFbclid ? ':white_check_mark:' : ':x:' }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        -4704,
+        192
+      ],
+      "id": "8822d105-4b3f-42ca-9dad-5dc9db9f458c",
+      "name": "Notify Slack - Created",
+      "webhookId": "8726eb5b-5b99-4e61-b67c-654cc97e9232"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer re_c54z96ES_PcksEG3ym3ToUDJmnLxnt5qC"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"from\": \"Mobile Craft Bars <leads@mobilecraftbars.com>\", \"to\": \"{{ $('Extract Booking Data').item.json.customerEmail }}\", \"reply_to\": \"mobilecraftbars@gmail.com\", \"subject\": \"You're booked, {{ $('Extract Booking Data').item.json.customerFirstName }}! Your Mobile Craft Bars discovery call is confirmed\", \"html\": \"<div style='font-family:system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#1a1a1a;max-width:560px;'><p>Hi {{ $('Extract Booking Data').item.json.customerFirstName }},</p><p>You're booked. James is looking forward to chatting with you about your {{ $('Extract Booking Data').item.json.eventType.toLowerCase() }}.</p><p><strong>Here's how the call will go:</strong></p><ol style='padding-left:18px;line-height:1.6;'><li>A 10-minute chat about your event details and what experience you want for your guests</li><li>Menu concepts, ingredient sourcing, and what setup options make sense for your venue</li><li>A custom quote within 24 hours of the call. No pressure to decide on the spot.</li></ol><p><strong>Quick prep:</strong> If you have specific cocktails in mind, a venue address, or anything unusual about the setup (rooftop, outdoor, multiple stations), jot it down. We'll talk through it on the call.</p><p>Check your inbox for the calendar invite from Calendly with the call link and exact time.</p><p>Need to reschedule? Just reply to this email and we'll find a new time.</p><p>Talk soon,<br>James Menkel<br>Mobile Craft Bars</p></div>\"}",
+        "options": {}
+      },
+      "id": "195b087a-2529-4981-9287-76c456d4bbd5",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -4480,
+        192
+      ],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Booking Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Booking Data": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack - Created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Slack - Created": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "headers": {
+          "host": "n8n-production-6d64.up.railway.app",
+          "user-agent": "curl/8.7.1",
+          "content-length": "449",
+          "accept": "*/*",
+          "content-type": "application/json",
+          "x-forwarded-for": "172.58.57.214",
+          "x-forwarded-host": "n8n-production-6d64.up.railway.app",
+          "x-forwarded-proto": "https",
+          "x-railway-edge": "railway/us-west2",
+          "x-railway-request-id": "SYlpntxATj6bRTYZ9o6EoQ",
+          "x-real-ip": "172.58.57.214",
+          "x-request-start": "1778550190641",
+          "accept-encoding": "gzip"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "eventId": "test-evt-1778550190",
+          "email": "test+funnel@digitalnovastudio.com",
+          "name": "Test Lead",
+          "eventType": "Wedding",
+          "guestCount": "75 to 150",
+          "when": "Next 60 days",
+          "budget": "$3,000 to $7,000",
+          "source": "Plan My Event",
+          "utm": {
+            "source": "facebook",
+            "medium": "paid",
+            "campaign": "test",
+            "fbclid": "fake-fbclid-123"
+          },
+          "pageUrl": "http://localhost:3000/book"
+        },
+        "webhookUrl": "https://n8n-production-6d64.up.railway.app/webhook-test/5feb276c-4596-448b-b307-834b4f66410d",
+        "executionMode": "test"
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "453758c0ef25b0d024c467164866786c3b14c00732ae9501c86d9650bab16500"
+  }
+}

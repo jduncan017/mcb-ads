@@ -16,6 +16,8 @@ export const env = createEnv({
     // From-address used when Resend sends the lead notification email.
     // Format: "Display Name <address@verified-domain.com>"
     LEAD_FROM_EMAIL: z.string().min(1).optional(),
+    // n8n webhook URL for post-booking automations. Fire-and-forget POST.
+    N8N_BOOKING_WEBHOOK_URL: z.string().url().optional(),
   },
 
   /**
@@ -29,6 +31,10 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
     NEXT_PUBLIC_META_PIXEL_ID: z.string().min(1).optional(),
+    // Google Ads account ID for gtag.js (format: "AW-XXXXXXXXXX")
+    NEXT_PUBLIC_GOOGLE_ADS_ID: z.string().min(1).optional(),
+    // Google Ads conversion label for the booking conversion action
+    NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL: z.string().min(1).optional(),
     // Meta domain verification token (Business Manager > Brand Safety > Domains)
     NEXT_PUBLIC_META_DOMAIN_VERIFICATION: z.string().min(1).optional(),
     // Privacy policy URL — required for Meta ad approval, may live on apex domain
@@ -41,10 +47,14 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     LEAD_NOTIFY_EMAIL: process.env.LEAD_NOTIFY_EMAIL,
     LEAD_FROM_EMAIL: process.env.LEAD_FROM_EMAIL,
+    N8N_BOOKING_WEBHOOK_URL: process.env.N8N_BOOKING_WEBHOOK_URL,
     NEXT_PUBLIC_BOOKING_URL: process.env.NEXT_PUBLIC_BOOKING_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
+    NEXT_PUBLIC_GOOGLE_ADS_ID: process.env.NEXT_PUBLIC_GOOGLE_ADS_ID,
+    NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL:
+      process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL,
     NEXT_PUBLIC_META_DOMAIN_VERIFICATION:
       process.env.NEXT_PUBLIC_META_DOMAIN_VERIFICATION,
     NEXT_PUBLIC_PRIVACY_POLICY_URL: process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL,

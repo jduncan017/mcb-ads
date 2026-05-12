@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { captureServerEvent } from "~/lib/posthog-server";
+import { env } from "~/env";
 
 /**
  * Client-app-triggered booking confirmation endpoint.
@@ -46,6 +47,9 @@ interface BookingConfirmedPayload {
     medium?: string;
     campaign?: string;
     fbclid?: string;
+    gclid?: string;
+    gbraid?: string;
+    wbraid?: string;
   };
   pageUrl?: string;
 }
@@ -84,6 +88,7 @@ export async function POST(request: NextRequest) {
           utm_medium: utm?.medium,
           utm_campaign: utm?.campaign,
           fbclid_present: !!utm?.fbclid,
+          gclid_present: !!(utm?.gclid ?? utm?.gbraid ?? utm?.wbraid),
           eventId,
         },
       });
@@ -93,6 +98,19 @@ export async function POST(request: NextRequest) {
   } else {
     console.warn(
       "[booking-confirmed] No email in payload — PostHog capture skipped",
+    );
+  }
+
+  // ── n8n webhook: post-booking automations ────────────────────────────────
+  // Fire-and-forget so SMS/email/Slack workflows don't block the response.
+  // n8n workflow owns all branching (which messages fire, when, to whom).
+  if (env.N8N_BOOKING_WEBHOOK_URL) {
+    fetch(env.N8N_BOOKING_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch((err) =>
+      console.error("[booking-confirmed] n8n webhook failed:", err),
     );
   }
 

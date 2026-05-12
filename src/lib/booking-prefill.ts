@@ -29,6 +29,9 @@ export interface BookingPrefill {
     medium?: string;
     campaign?: string;
     fbclid?: string;
+    gclid?: string;
+    gbraid?: string;
+    wbraid?: string;
   };
   /** Unix ms for staleness checks. */
   storedAt: number;

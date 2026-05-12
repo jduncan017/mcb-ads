@@ -22,12 +22,6 @@ import { stashBookingPrefill } from "~/lib/booking-prefill";
 
 type EventType = "Wedding" | "Corporate Event" | "Private Party" | "Other";
 type GuestCount = "Under 30" | "30 to 75" | "75 to 150" | "150+";
-type WhenAnswer =
-  | "Within 30 days"
-  | "Between 30 to 60 days"
-  | "Later this year"
-  | "Next year or after"
-  | "Not sure yet";
 type Budget =
   | "Under $1,000"
   | "$1,000 to $2,000"
@@ -48,7 +42,8 @@ type Step =
 interface Answers {
   eventType?: EventType;
   guestCount?: GuestCount;
-  when?: WhenAnswer;
+  /** ISO YYYY-MM-DD from the date picker. Formatted for display at send time. */
+  when?: string;
   budget?: Budget;
   name?: string;
   email?: string;
@@ -79,13 +74,6 @@ const guestOptions: GuestCount[] = [
   "30 to 75",
   "75 to 150",
   "150+",
-];
-const whenOptions: WhenAnswer[] = [
-  "Within 30 days",
-  "Between 30 to 60 days",
-  "Later this year",
-  "Next year or after",
-  "Not sure yet",
 ];
 const budgetOptions: Budget[] = [
   "Under $1,000",
@@ -226,7 +214,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
           body: JSON.stringify({
             eventType: answers.eventType,
             guestCount: answers.guestCount,
-            when: answers.when,
+            when: formatEventDate(answers.when),
             budget: answers.budget,
             name,
             email,
@@ -243,7 +231,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
           qualified: true,
           eventType: answers.eventType,
           guestCount: answers.guestCount,
-          when: answers.when,
+          when: formatEventDate(answers.when),
           budget: answers.budget,
         });
 
@@ -274,7 +262,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
           email,
           eventType: answers.eventType,
           guestCount: answers.guestCount,
-          when: answers.when,
+          when: formatEventDate(answers.when),
           budget: answers.budget,
           source: trackingSource,
           utm,
@@ -303,7 +291,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
           body: JSON.stringify({
             eventType: answers.eventType ?? "n/a",
             guestCount: answers.guestCount ?? "n/a",
-            when: answers.when ?? "n/a",
+            when: formatEventDate(answers.when) ?? "n/a",
             budget: answers.budget ?? "Under $1,000",
             name,
             email,
@@ -321,7 +309,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
           qualified: false,
           eventType: answers.eventType,
           guestCount: answers.guestCount,
-          when: answers.when,
+          when: formatEventDate(answers.when),
           budget: answers.budget,
         });
 
@@ -405,10 +393,12 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
             />
           )}
           {step === "when" && (
-            <ChoiceStep
-              title="When Is the Event?"
-              options={whenOptions}
-              onSelect={(v) => selectChoice("when", v, "budget")}
+            <DateStep
+              initialValue={answers.when}
+              onSubmit={(iso) => {
+                setAnswers((a) => ({ ...a, when: iso }));
+                advanceTo("budget");
+              }}
             />
           )}
           {step === "budget" && (
@@ -524,12 +514,86 @@ function FrictionStep({
         <span className="text-primary-100 font-semibold">
           $800 for bartending
         </span>{" "}
-        alone, plus alcohol on top. Tight, but doable for small events. Still
-        want to chat?
+        services. Alcohol is a separate charge. That&apos;s tight, but doable
+        for small events. Still want to chat?
       </p>
       <div className="flex flex-col gap-4">
         <ChoiceButton onClick={onYes}>Yes, that works</ChoiceButton>
         <ChoiceButton onClick={onNo}>Above my budget</ChoiceButton>
+      </div>
+    </div>
+  );
+}
+
+function DateStep({
+  initialValue,
+  onSubmit,
+}: {
+  initialValue?: string;
+  onSubmit: (iso: string) => void;
+}) {
+  const [date, setDate] = useState(initialValue ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const today = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, []);
+
+  function handleSubmit() {
+    if (!date) {
+      setError("Please pick a date");
+      inputRef.current?.focus();
+      return;
+    }
+    setError(null);
+    onSubmit(date);
+  }
+
+  function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit();
+    }
+  }
+
+  return (
+    <div className="flex flex-1 flex-col">
+      <h3 className="mb-2 w-full text-center text-2xl tracking-wider">
+        When Is the Event?
+      </h3>
+      <p className="mb-6 w-full text-center text-sm font-normal tracking-wide text-white/90">
+        Not locked in yet? Pick the closest date you have in mind.
+      </p>
+      <ModalInput
+        ref={inputRef}
+        label="Event date"
+        type="date"
+        min={today}
+        value={date}
+        onChange={(e) => {
+          setDate(e.target.value);
+          if (error) setError(null);
+        }}
+        onKeyDown={handleKey}
+        error={error}
+      />
+      <div className="mt-auto flex items-center justify-between pt-8">
+        <span className="text-xs tracking-wide text-white/60">
+          Press Enter ↵ to continue
+        </span>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="bg-primary-300 hover:bg-primary-200 focus-visible:ring-primary-300/50 rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide text-white shadow-[0_0_24px_-4px_rgba(101,144,195,0.6)] transition focus:outline-none focus-visible:ring-2"
+        >
+          Continue →
+        </button>
       </div>
     </div>
   );
@@ -879,6 +943,19 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+/** ISO `YYYY-MM-DD` → `Saturday, July 15, 2026`. Used for email + Calendly prefill. */
+function formatEventDate(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 function parseUtm(qs: string) {
   if (!qs) return {};
   const params = new URLSearchParams(qs);
@@ -887,6 +964,10 @@ function parseUtm(qs: string) {
     medium: params.get("utm_medium") ?? undefined,
     campaign: params.get("utm_campaign") ?? undefined,
     fbclid: params.get("fbclid") ?? undefined,
+    gclid: params.get("gclid") ?? undefined,
+    // gbraid/wbraid: iOS Google Ads click IDs when ATT prompt limits gclid
+    gbraid: params.get("gbraid") ?? undefined,
+    wbraid: params.get("wbraid") ?? undefined,
   };
 }
 

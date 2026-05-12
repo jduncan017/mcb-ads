@@ -15,6 +15,26 @@ export default function ThankYouPage() {
   useEffect(() => {
     const stash = readBookingPrefill();
     setPrefill(stash);
+
+    // Fire Google Ads conversion. transaction_id = eventId ties this fire
+    // to the booking so any future Enhanced Conversions server-fire dedupes
+    // against it. Skips silently if either env var is missing.
+    const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
+    const conversionLabel = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
+    if (adsId && conversionLabel) {
+      const w = window as unknown as {
+        gtag?: (
+          cmd: string,
+          event: string,
+          params?: Record<string, unknown>,
+        ) => void;
+      };
+      w.gtag?.("event", "conversion", {
+        send_to: `${adsId}/${conversionLabel}`,
+        transaction_id: stash?.eventId,
+      });
+    }
+
     // Clear sessionStorage after we've read it. Prevents a fresh tab
     // landing on /thank-you from rendering someone else's stale data,
     // and ensures a hard reload shows the generic confirmation.
