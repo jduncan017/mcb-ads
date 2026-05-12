@@ -38,17 +38,22 @@ export interface BookingPrefill {
   storedAt: number;
 }
 
-type StashInput = Omit<BookingPrefill, "eventId" | "storedAt">;
+type StashInput = Omit<BookingPrefill, "eventId" | "storedAt"> & {
+  /** Reuse an existing event_id (e.g. the one already used for the Lead fire). */
+  eventId?: string;
+};
 
 /**
- * Generate a fresh event_id and stash the prefill in sessionStorage.
- * Returns the stashed object so callers can use the eventId immediately.
+ * Stash the prefill in sessionStorage. Generates a fresh event_id if the caller
+ * doesn't provide one. Returns the stashed object so callers can use the
+ * eventId immediately.
  */
 export function stashBookingPrefill(input: StashInput): BookingPrefill {
   const eventId =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
+    input.eventId ??
+    (typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
-      : `evt_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      : `evt_${Date.now()}_${Math.random().toString(36).slice(2)}`);
 
   const stash: BookingPrefill = {
     ...input,

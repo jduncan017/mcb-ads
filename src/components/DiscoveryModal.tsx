@@ -208,6 +208,15 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
       setStep("submitting");
       try {
         const utm = parseUtm(persistedQs);
+        // Generate the event_id upfront so all three Lead-related fires share
+        // it: server CAPI Lead (in /api/discovery-lead), browser pixel Lead
+        // (below), and Schedule reuse via stashBookingPrefill. Without a shared
+        // id Meta double-counts browser + server fires.
+        const leadEventId =
+          typeof crypto !== "undefined" && "randomUUID" in crypto
+            ? crypto.randomUUID()
+            : `evt_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
         await fetch("/api/discovery-lead", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -220,6 +229,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
             email,
             declined: false,
             utm,
+            eventId: leadEventId,
             pageUrl:
               typeof window !== "undefined" ? window.location.href : undefined,
           }),
@@ -235,20 +245,27 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
           budget: answers.budget,
         });
 
-        // Fire client-side Meta Lead event (browser pixel)
+        // Fire client-side Meta Lead event (browser pixel). eventID matches the
+        // server CAPI Lead above so Meta dedupes the pair within its 48hr window.
         if (typeof window !== "undefined") {
           const w = window as unknown as {
             fbq?: (
               cmd: string,
               event: string,
               params?: Record<string, unknown>,
+              options?: { eventID?: string },
             ) => void;
           };
-          w.fbq?.("track", "Lead", {
-            content_category: answers.eventType,
-            value: 0,
-            currency: "USD",
-          });
+          w.fbq?.(
+            "track",
+            "Lead",
+            {
+              content_category: answers.eventType,
+              value: 0,
+              currency: "USD",
+            },
+            { eventID: leadEventId },
+          );
         }
 
         // Stash the prefill data + a fresh event_id in sessionStorage so /book
@@ -257,6 +274,8 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
         // Calendly via salesforce_uuid so the server-side CAPI Schedule fire
         // (in cal-webhook) and the client-side Schedule fire (in /book) share
         // an event_id and Meta dedupes them.
+        // Reuse the same event_id for the downstream Schedule fires so the
+        // entire Lead → Schedule funnel ties to one identifier per visitor.
         stashBookingPrefill({
           name,
           email,
@@ -266,6 +285,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
           budget: answers.budget,
           source: trackingSource,
           utm,
+          eventId: leadEventId,
         });
 
         // Carry persisted query string through to /book so utm + fbclid stay

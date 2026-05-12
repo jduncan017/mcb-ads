@@ -27,6 +27,8 @@ interface LeadPayload {
   email: string;
   declined?: boolean;
   notes?: string;
+  /** Shared event_id used to dedupe the browser pixel Lead fire against the CAPI Lead fire. */
+  eventId?: string;
   utm?: {
     source?: string;
     medium?: string;
@@ -196,6 +198,9 @@ async function fireMetaLeadEvent(
         event_time: eventTime,
         action_source: "website",
         event_source_url: payload.pageUrl,
+        // event_id matches what the browser pixel fired so Meta dedupes the
+        // pair. Generated in DiscoveryModal.submitContact and passed through.
+        ...(payload.eventId && { event_id: payload.eventId }),
         custom_data: {
           event_type: payload.eventType,
           guest_count: payload.guestCount,
