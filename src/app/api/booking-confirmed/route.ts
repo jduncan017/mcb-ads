@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
-import crypto from "crypto";
 import { captureServerEvent } from "~/lib/posthog-server";
+import { buildMetaUserData, hashSHA256 } from "~/lib/meta-capi";
 import { env } from "~/env";
 
 /**
@@ -182,6 +182,18 @@ export async function POST(request: NextRequest) {
   }
 
   const eventTime = Math.floor(Date.now() / 1000);
+  const userData = await buildMetaUserData(
+    request,
+    {
+      email,
+      phone: payload.phone,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      fbclid,
+    },
+    eventTime,
+  );
+
   const testEventCode = process.env.META_TEST_EVENT_CODE;
   const eventData = {
     data: [
@@ -198,12 +210,7 @@ export async function POST(request: NextRequest) {
           guest_count: guestCount,
           budget,
         },
-        user_data: {
-          ...(fbclid && { fbc: `fb.1.${eventTime}.${fbclid}` }),
-          ...(email && {
-            em: [await hashSHA256(email.toLowerCase().trim())],
-          }),
-        },
+        user_data: userData,
       },
     ],
     ...(testEventCode && { test_event_code: testEventCode }),
@@ -301,10 +308,3 @@ async function fetchCalendlyMeeting(
   }
 }
 
-async function hashSHA256(value: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(value);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}

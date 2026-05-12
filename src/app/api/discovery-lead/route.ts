@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
+import { buildMetaUserData } from "~/lib/meta-capi";
 
 /**
  * Discovery-call lead capture endpoint.
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     process.env.NEXT_PUBLIC_META_PIXEL_ID &&
     process.env.META_CONVERSIONS_API_TOKEN
   ) {
-    tasks.push(fireMetaLeadEvent(payload, fbclid));
+    tasks.push(fireMetaLeadEvent(request, payload, fbclid));
   }
 
   // Don't block the response on email/CAPI failures — log and move on
@@ -189,6 +189,7 @@ function escapeHtml(value: string): string {
 }
 
 async function fireMetaLeadEvent(
+  request: NextRequest,
   payload: LeadPayload,
   fbclid: string | undefined,
 ): Promise<void> {
@@ -197,7 +198,17 @@ async function fireMetaLeadEvent(
   if (!pixelId || !accessToken) return;
 
   const eventTime = Math.floor(Date.now() / 1000);
-  const emailHash = await hashSHA256(payload.email.toLowerCase().trim());
+  const userData = await buildMetaUserData(
+    request,
+    {
+      email: payload.email,
+      phone: payload.phone,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      fbclid,
+    },
+    eventTime,
+  );
 
   const testEventCode = process.env.META_TEST_EVENT_CODE;
   const eventData = {
@@ -215,10 +226,7 @@ async function fireMetaLeadEvent(
           guest_count: payload.guestCount,
           budget: payload.budget,
         },
-        user_data: {
-          em: [emailHash],
-          ...(fbclid && { fbc: `fb.1.${eventTime}.${fbclid}` }),
-        },
+        user_data: userData,
       },
     ],
     ...(testEventCode && { test_event_code: testEventCode }),
@@ -237,14 +245,6 @@ async function fireMetaLeadEvent(
     const errText = await res.text();
     throw new Error(`Meta CAPI failed: ${res.status} ${errText}`);
   }
-}
-
-async function hashSHA256(value: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(value);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 function isValidEmail(value: string): boolean {
