@@ -631,14 +631,14 @@ function DateStep({
         onKeyDown={handleKey}
         error={error}
       />
-      <div className="mt-auto flex items-center justify-between pt-8">
-        <span className="text-xs tracking-wide text-white/60">
+      <div className="mt-auto flex items-center justify-between gap-4 pt-8">
+        <span className="hidden text-xs tracking-wide text-white/60 sm:inline">
           Press Enter ↵ to continue
         </span>
         <button
           type="button"
           onClick={handleSubmit}
-          className="bg-primary-300 hover:bg-primary-200 focus-visible:ring-primary-300/50 rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide text-white shadow-[0_0_24px_-4px_rgba(101,144,195,0.6)] transition focus:outline-none focus-visible:ring-2"
+          className="bg-primary-300 hover:bg-primary-200 focus-visible:ring-primary-300/50 ml-auto rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide text-white shadow-[0_0_24px_-4px_rgba(101,144,195,0.6)] transition focus:outline-none focus-visible:ring-2"
         >
           Continue →
         </button>
@@ -984,14 +984,14 @@ interface ModalInputProps extends Omit<
 const ModalInput = forwardRef<HTMLInputElement, ModalInputProps>(
   function ModalInput({ label, error, ...rest }, ref) {
     return (
-      <label className="flex flex-col gap-2">
+      <label className="flex min-w-0 flex-col gap-2">
         <span className="text-xs font-semibold tracking-[0.12em] text-white/70 uppercase">
           {label}
         </span>
         <input
           ref={ref}
           {...rest}
-          className={`w-full rounded-xl border bg-gray-200 px-4 py-3.5 text-base font-normal tracking-wide text-black placeholder:tracking-wide placeholder:text-black/50 focus:outline-none ${
+          className={`box-border w-full min-w-0 appearance-none rounded-xl border bg-gray-200 px-4 py-3.5 text-base font-normal tracking-wide text-black placeholder:tracking-wide placeholder:text-black/50 focus:outline-none ${
             error
               ? "border-rose-400/60"
               : "focus:border-primary-200/60 border-gray-400/40"

@@ -53,10 +53,10 @@ const CALENDLY_THEME_PARAMS = {
 
 const CALENDLY_SCRIPT_SRC = "https://assets.calendly.com/assets/external/widget.js";
 // Height tuned per breakpoint so Calendly never needs internal scroll:
-// - Desktop: 900px fits Calendar select (~650px) and Enter Details (~850px)
+// - Desktop: Enter Details form (~1000px with prefilled QA rows) + buffer
 // - Mobile: form fields stack vertically, terms text wraps, prefilled QA rows
 //   stack — total runs ~1250px. Use 1300 for buffer.
-const WIDGET_HEIGHT_CLASS = "h-[1300px] sm:h-[900px]";
+const WIDGET_HEIGHT_CLASS = "h-[1300px] sm:h-[1100px]";
 
 const siteName = "Mobile Craft Bars";
 
