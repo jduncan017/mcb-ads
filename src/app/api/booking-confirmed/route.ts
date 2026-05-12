@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import crypto from "crypto";
 import { captureServerEvent } from "~/lib/posthog-server";
 import { env } from "~/env";
@@ -104,16 +105,26 @@ export async function POST(request: NextRequest) {
   }
 
   // ── n8n webhook: post-booking automations ────────────────────────────────
-  // Fire-and-forget so SMS/email/Slack workflows don't block the response.
-  // n8n workflow owns all branching (which messages fire, when, to whom).
-  if (env.N8N_BOOKING_WEBHOOK_URL) {
-    fetch(env.N8N_BOOKING_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }).catch((err) =>
-      console.error("[booking-confirmed] n8n webhook failed:", err),
-    );
+  // Run after the response is sent so SMS/email/Slack workflows don't block
+  // the user's redirect to /thank-you. `after()` keeps the serverless
+  // function alive past the response — a bare fire-and-forget fetch gets
+  // killed when the function returns in Vercel.
+  const n8nUrl = env.N8N_BOOKING_WEBHOOK_URL;
+  if (n8nUrl) {
+    after(async () => {
+      try {
+        const res = await fetch(n8nUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          console.error("[booking-confirmed] n8n webhook non-2xx:", res.status);
+        }
+      } catch (err) {
+        console.error("[booking-confirmed] n8n webhook failed:", err);
+      }
+    });
   }
 
   // ── Meta Conversions API: Schedule ────────────────────────────────────────
