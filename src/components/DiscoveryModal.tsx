@@ -20,7 +20,11 @@ import { stashBookingPrefill } from "~/lib/booking-prefill";
 // Types
 // ============================================================================
 
-type EventType = "Wedding" | "Corporate Event" | "Private Party" | "Other";
+type EventType =
+  | "Wedding"
+  | "Corporate Event"
+  | "Private Event"
+  | "Festival";
 type GuestCount = "Under 30" | "30 to 75" | "75 to 150" | "150+";
 type Budget =
   | "Under $1,000"
@@ -45,9 +49,11 @@ interface Answers {
   /** ISO YYYY-MM-DD from the date picker. Formatted for display at send time. */
   when?: string;
   budget?: Budget;
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   phone?: string;
+  eventDetails?: string;
 }
 
 interface DiscoveryModalProps {
@@ -67,8 +73,8 @@ export const DiscoveryModalCloseContext = createContext<(() => void) | null>(
 const eventOptions: EventType[] = [
   "Wedding",
   "Corporate Event",
-  "Private Party",
-  "Other",
+  "Private Event",
+  "Festival",
 ];
 const guestOptions: GuestCount[] = [
   "Under 30",
@@ -205,7 +211,13 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
 
   // ── Submit handlers ─────────────────────────────────────────────────────
   const submitContact = useCallback(
-    async (name: string, email: string, phone: string) => {
+    async (
+      firstName: string,
+      lastName: string,
+      email: string,
+      phone: string,
+      eventDetails: string,
+    ) => {
       setStep("submitting");
       try {
         const utm = parseUtm(persistedQs);
@@ -226,9 +238,11 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
             guestCount: answers.guestCount,
             when: formatEventDate(answers.when),
             budget: answers.budget,
-            name,
+            firstName,
+            lastName,
             email,
             phone,
+            eventDetails,
             declined: false,
             utm,
             eventId: leadEventId,
@@ -279,9 +293,11 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
         // Reuse the same event_id for the downstream Schedule fires so the
         // entire Lead → Schedule funnel ties to one identifier per visitor.
         stashBookingPrefill({
-          name,
+          firstName,
+          lastName,
           email,
           phone,
+          eventDetails,
           eventType: answers.eventType,
           guestCount: answers.guestCount,
           when: formatEventDate(answers.when),
@@ -308,6 +324,11 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
     async (name: string, email: string, notes: string) => {
       try {
         const utm = parseUtm(persistedQs);
+        // Decline flow keeps a single "name" input for UX simplicity (low-value
+        // path). Split best-effort so the lead email's name row matches the
+        // qualified path's "First Last" format.
+        const [firstName, ...rest] = name.trim().split(/\s+/);
+        const lastName = rest.join(" ");
         await fetch("/api/discovery-lead", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -316,7 +337,8 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
             guestCount: answers.guestCount ?? "n/a",
             when: formatEventDate(answers.when) ?? "n/a",
             budget: answers.budget ?? "Under $1,000",
-            name,
+            firstName,
+            lastName,
             email,
             notes,
             declined: true,
@@ -449,9 +471,11 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
             <ContactStep
               error={error}
               onSubmit={submitContact}
-              defaultName={answers.name}
+              defaultFirstName={answers.firstName}
+              defaultLastName={answers.lastName}
               defaultEmail={answers.email}
               defaultPhone={answers.phone}
+              defaultEventDetails={answers.eventDetails}
             />
           )}
           {step === "submitting" && <SubmittingStep />}
@@ -625,32 +649,50 @@ function DateStep({
 
 function ContactStep({
   error,
-  defaultName,
+  defaultFirstName,
+  defaultLastName,
   defaultEmail,
   defaultPhone,
+  defaultEventDetails,
   onSubmit,
 }: {
   error: string | null;
-  defaultName?: string;
+  defaultFirstName?: string;
+  defaultLastName?: string;
   defaultEmail?: string;
   defaultPhone?: string;
-  onSubmit: (name: string, email: string, phone: string) => void;
+  defaultEventDetails?: string;
+  onSubmit: (
+    firstName: string,
+    lastName: string,
+    email: string,
+    phone: string,
+    eventDetails: string,
+  ) => void;
 }) {
-  const [name, setName] = useState(defaultName ?? "");
+  const [firstName, setFirstName] = useState(defaultFirstName ?? "");
+  const [lastName, setLastName] = useState(defaultLastName ?? "");
   const [email, setEmail] = useState(defaultEmail ?? "");
   const [phone, setPhone] = useState(defaultPhone ?? "");
+  const [eventDetails, setEventDetails] = useState(defaultEventDetails ?? "");
   const [emailError, setEmailError] = useState<string | null>(null);
-  const nameRef = useRef<HTMLInputElement>(null);
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
+  const eventDetailsRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    nameRef.current?.focus();
+    firstNameRef.current?.focus();
   }, []);
 
   function handleSubmit() {
-    if (!name.trim()) {
-      nameRef.current?.focus();
+    if (!firstName.trim()) {
+      firstNameRef.current?.focus();
+      return;
+    }
+    if (!lastName.trim()) {
+      lastNameRef.current?.focus();
       return;
     }
     if (!email.trim() || !isValidEmail(email)) {
@@ -658,16 +700,34 @@ function ContactStep({
       emailRef.current?.focus();
       return;
     }
+    if (!eventDetails.trim()) {
+      eventDetailsRef.current?.focus();
+      return;
+    }
     setEmailError(null);
     // Phone optional — normalize to E.164 (+1XXXXXXXXXX) so Calendly's phone
     // field doesn't treat raw 10-digit US numbers as a foreign country.
-    onSubmit(name.trim(), email.trim(), normalizeUsPhone(phone));
+    onSubmit(
+      firstName.trim(),
+      lastName.trim(),
+      email.trim(),
+      normalizeUsPhone(phone),
+      eventDetails.trim(),
+    );
   }
 
-  function handleNameKey(e: React.KeyboardEvent<HTMLInputElement>) {
+  function handleFirstNameKey(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!name.trim()) return;
+      if (!firstName.trim()) return;
+      lastNameRef.current?.focus();
+    }
+  }
+
+  function handleLastNameKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!lastName.trim()) return;
       emailRef.current?.focus();
     }
   }
@@ -700,15 +760,26 @@ function ContactStep({
         We&apos;ll email you a confirmation and follow up after the call.
       </p>
       <div className="flex flex-col gap-4">
-        <ModalInput
-          label="First name"
-          ref={nameRef}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={handleNameKey}
-          placeholder="Jane"
-          autoComplete="given-name"
-        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ModalInput
+            label="First name"
+            ref={firstNameRef}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            onKeyDown={handleFirstNameKey}
+            placeholder="Jane"
+            autoComplete="given-name"
+          />
+          <ModalInput
+            label="Last name"
+            ref={lastNameRef}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            onKeyDown={handleLastNameKey}
+            placeholder="Doe"
+            autoComplete="family-name"
+          />
+        </div>
         <ModalInput
           label="Email"
           ref={emailRef}
@@ -733,12 +804,17 @@ function ContactStep({
           placeholder="(555) 123-4567"
           autoComplete="tel"
         />
+        <ModalTextarea
+          label="Tell us a little bit about your event"
+          ref={eventDetailsRef}
+          value={eventDetails}
+          onChange={(e) => setEventDetails(e.target.value)}
+          placeholder="Venue, vibe, must-have cocktails, anything unusual about the setup..."
+          rows={3}
+        />
       </div>
       {error && <p className="mt-4 text-sm text-rose-400">{error}</p>}
-      <div className="mt-auto flex items-center justify-between pt-8">
-        <span className="text-xs tracking-wide text-white/60">
-          Press Enter ↵ to continue
-        </span>
+      <div className="mt-auto flex items-center justify-end pt-8">
         <button
           type="button"
           onClick={handleSubmit}
@@ -935,24 +1011,27 @@ interface ModalTextareaProps extends Omit<
   error?: string | null;
 }
 
-function ModalTextarea({ label, error, ...rest }: ModalTextareaProps) {
-  return (
-    <label className="flex flex-col gap-2">
-      <span className="text-xs font-semibold tracking-[0.12em] text-white/70 uppercase">
-        {label}
-      </span>
-      <textarea
-        {...rest}
-        className={`placeholder:text-black/50focus:outline-none w-full resize-none rounded-xl border bg-gray-200 px-4 py-3 text-base text-black ${
-          error
-            ? "border-rose-400/60"
-            : "focus:border-primary-300/50 border-white/15"
-        }`}
-      />
-      {error && <span className="text-xs text-rose-400">{error}</span>}
-    </label>
-  );
-}
+const ModalTextarea = forwardRef<HTMLTextAreaElement, ModalTextareaProps>(
+  function ModalTextarea({ label, error, ...rest }, ref) {
+    return (
+      <label className="flex flex-col gap-2">
+        <span className="text-xs font-semibold tracking-[0.12em] text-white/70 uppercase">
+          {label}
+        </span>
+        <textarea
+          ref={ref}
+          {...rest}
+          className={`placeholder:text-black/50focus:outline-none w-full resize-none rounded-xl border bg-gray-200 px-4 py-3 text-base text-black ${
+            error
+              ? "border-rose-400/60"
+              : "focus:border-primary-300/50 border-white/15"
+          }`}
+        />
+        {error && <span className="text-xs text-rose-400">{error}</span>}
+      </label>
+    );
+  },
+);
 
 function ProgressDots({
   total,

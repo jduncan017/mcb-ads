@@ -41,7 +41,7 @@ export default function ThankYouPage() {
     clearBookingPrefill();
   }, []);
 
-  const firstName = prefill?.name?.split(" ")[0];
+  const firstName = prefill?.firstName;
   const eventDescriptor = describeEvent(prefill);
 
   return (
@@ -137,8 +137,10 @@ function formatEventType(value: string): string {
       return "wedding";
     case "Corporate Event":
       return "corporate event";
-    case "Private Party":
-      return "private party";
+    case "Private Event":
+      return "private event";
+    case "Festival":
+      return "festival";
     default:
       return "event";
   }

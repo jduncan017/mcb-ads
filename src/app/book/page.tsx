@@ -185,8 +185,10 @@ export default function BookPage() {
             body: JSON.stringify({
               eventId: prefill.eventId,
               email: prefill.email,
-              name: prefill.name,
+              firstName: prefill.firstName,
+              lastName: prefill.lastName,
               phone: prefill.phone,
+              eventDetails: prefill.eventDetails,
               eventType: prefill.eventType,
               guestCount: prefill.guestCount,
               when: prefill.when,
@@ -213,7 +215,7 @@ export default function BookPage() {
     return () => window.removeEventListener("message", handleMessage);
   }, [prefill]);
 
-  const firstName = prefill?.name?.split(" ")[0];
+  const firstName = prefill?.firstName;
   const eventDescriptor = formatEventDescriptor(prefill);
 
   return (
@@ -318,13 +320,17 @@ function buildCalendlyEmbedUrl(prefill: BookingPrefill | null): string {
   }
 
   if (prefill) {
-    append("name", prefill.name);
+    // Calendly's split-name field uses first_name + last_name URL params when
+    // the event type has the name field set to "First name + Last name" mode.
+    append("first_name", prefill.firstName);
+    append("last_name", prefill.lastName);
     append("email", prefill.email);
     append("a1", prefill.eventType);
     append("a2", prefill.guestCount);
     append("a3", prefill.when);
     append("a4", prefill.budget);
     append("a5", prefill.phone);
+    append("a6", prefill.eventDetails);
     append("utm_source", prefill.utm.source);
     append("utm_medium", prefill.utm.medium);
     append("utm_campaign", prefill.utm.campaign);
@@ -350,8 +356,10 @@ function formatEventType(value: string): string {
       return "wedding";
     case "Corporate Event":
       return "corporate event";
-    case "Private Party":
-      return "private party";
+    case "Private Event":
+      return "private event";
+    case "Festival":
+      return "festival";
     default:
       return "event";
   }

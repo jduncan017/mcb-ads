@@ -37,8 +37,10 @@ const ALLOWED_ORIGINS = new Set([
 interface BookingConfirmedPayload {
   eventId?: string;
   email?: string;
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
+  eventDetails?: string;
   eventType?: string;
   guestCount?: string;
   when?: string;

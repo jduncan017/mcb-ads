@@ -16,9 +16,11 @@ const STORAGE_KEY = "mcb:booking-prefill";
 
 export interface BookingPrefill {
   eventId: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string;
+  eventDetails?: string;
   eventType?: string;
   guestCount?: string;
   when?: string;
@@ -84,7 +86,7 @@ export function readBookingPrefill(): BookingPrefill | null {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as BookingPrefill;
-    if (!parsed.eventId || !parsed.email) return null;
+    if (!parsed.eventId || !parsed.email || !parsed.firstName) return null;
     const ageMs = Date.now() - (parsed.storedAt ?? 0);
     if (ageMs > 2 * 60 * 60 * 1000) return null;
     return parsed;
