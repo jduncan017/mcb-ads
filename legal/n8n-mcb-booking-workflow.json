@@ -46,50 +46,26 @@
             },
             {
               "id": "id-5",
-              "name": "guestCount",
-              "value": "={{ $json.body.guestCount }}",
-              "type": "string"
-            },
-            {
-              "id": "id-6",
-              "name": "bookingWhen",
+              "name": "bookingDate",
               "value": "={{ $json.body.when }}",
               "type": "string"
             },
             {
-              "id": "id-7",
+              "id": "id-6",
               "name": "budget",
               "value": "={{ $json.body.budget }}",
               "type": "string"
             },
             {
-              "id": "id-8",
-              "name": "ctaSource",
-              "value": "={{ $json.body.source }}",
-              "type": "string"
-            },
-            {
-              "id": "id-9",
-              "name": "trafficSource",
+              "id": "id-7",
+              "name": "source",
               "value": "={{ $json.body.utm?.source ?? 'direct' }}",
               "type": "string"
             },
             {
-              "id": "id-10",
-              "name": "campaign",
-              "value": "={{ $json.body.utm?.campaign ?? '' }}",
-              "type": "string"
-            },
-            {
-              "id": "id-11",
-              "name": "hasFbclid",
-              "value": "={{ !!$json.body.utm?.fbclid }}",
-              "type": "boolean"
-            },
-            {
-              "id": "id-12",
-              "name": "eventId",
-              "value": "={{ $json.body.eventId }}",
+              "id": "id-8",
+              "name": "creative",
+              "value": "={{ $json.body.utm?.content ?? '—' }}",
               "type": "string"
             }
           ]
@@ -113,7 +89,7 @@
           "value": "#mobile-craft-bars",
           "mode": "name"
         },
-        "text": "=:cocktail: *New MCB discovery call booked!*\n\n*{{ $('Extract Booking Data').item.json.customerName }}* booked a call for their *{{ $('Extract Booking Data').item.json.eventType }}* ({{ $('Extract Booking Data').item.json.guestCount }} guests)\n\n• Budget: {{ $('Extract Booking Data').item.json.budget }}\n• Timing: {{ $('Extract Booking Data').item.json.bookingWhen }}\n• Email: {{ $('Extract Booking Data').item.json.customerEmail }}\n• Traffic: {{ $('Extract Booking Data').item.json.trafficSource }}{{ $('Extract Booking Data').item.json.campaign ? ' / ' + $('Extract Booking Data').item.json.campaign : '' }}\n• CTA: {{ $('Extract Booking Data').item.json.ctaSource }}\n• fbclid: {{ $('Extract Booking Data').item.json.hasFbclid ? ':white_check_mark:' : ':x:' }}",
+        "text": "=:cocktail: *New MCB lead booked!*\n\n*Name:* {{ $('Extract Booking Data').item.json.customerName }}\n*Email:* {{ $('Extract Booking Data').item.json.customerEmail }}\n*Date:* {{ $('Extract Booking Data').item.json.bookingDate }}\n*Budget:* {{ $('Extract Booking Data').item.json.budget }}\n*Source:* {{ $('Extract Booking Data').item.json.source }}\n*Creative:* {{ $('Extract Booking Data').item.json.creative }}",
         "otherOptions": {}
       },
       "type": "n8n-nodes-base.slack",
@@ -233,7 +209,8 @@
           "utm": {
             "source": "facebook",
             "medium": "paid",
-            "campaign": "test",
+            "campaign": "summer-2026",
+            "content": "video-ad-v1",
             "fbclid": "fake-fbclid-123"
           },
           "pageUrl": "http://localhost:3000/book"
