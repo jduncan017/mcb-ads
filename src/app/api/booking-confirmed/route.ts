@@ -46,6 +46,7 @@ interface BookingConfirmedPayload {
     source?: string;
     medium?: string;
     campaign?: string;
+    content?: string;
     fbclid?: string;
     gclid?: string;
     gbraid?: string;
@@ -87,6 +88,7 @@ export async function POST(request: NextRequest) {
           utm_source: utm?.source,
           utm_medium: utm?.medium,
           utm_campaign: utm?.campaign,
+          utm_content: utm?.content,
           fbclid_present: !!utm?.fbclid,
           gclid_present: !!(utm?.gclid ?? utm?.gbraid ?? utm?.wbraid),
           eventId,

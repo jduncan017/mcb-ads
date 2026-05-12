@@ -311,6 +311,7 @@ function buildCalendlyEmbedUrl(prefill: BookingPrefill | null): string {
     append("utm_source", prefill.utm.source);
     append("utm_medium", prefill.utm.medium);
     append("utm_campaign", prefill.utm.campaign);
+    append("utm_content", prefill.utm.content);
     // Co-opt salesforce_uuid for the event_id so the cal-webhook can dedupe
     // its server-side Schedule fire against the client-side fire above.
     append("salesforce_uuid", prefill.eventId);

@@ -28,6 +28,7 @@ export interface BookingPrefill {
     source?: string;
     medium?: string;
     campaign?: string;
+    content?: string;
     fbclid?: string;
     gclid?: string;
     gbraid?: string;

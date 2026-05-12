@@ -963,6 +963,7 @@ function parseUtm(qs: string) {
     source: params.get("utm_source") ?? undefined,
     medium: params.get("utm_medium") ?? undefined,
     campaign: params.get("utm_campaign") ?? undefined,
+    content: params.get("utm_content") ?? undefined,
     fbclid: params.get("fbclid") ?? undefined,
     gclid: params.get("gclid") ?? undefined,
     // gbraid/wbraid: iOS Google Ads click IDs when ATT prompt limits gclid

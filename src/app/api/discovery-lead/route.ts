@@ -31,6 +31,7 @@ interface LeadPayload {
     source?: string;
     medium?: string;
     campaign?: string;
+    content?: string;
     fbclid?: string;
     gclid?: string;
     gbraid?: string;
@@ -132,7 +133,7 @@ async function sendOwnerEmail(payload: LeadPayload): Promise<void> {
     payload.utm?.gbraid ||
     payload.utm?.wbraid ||
     payload.utm?.source
-      ? `<p style="color:#6b7280;font-family:system-ui,sans-serif;font-size:13px;">Source: ${payload.utm?.source ?? "direct"}${payload.utm?.campaign ? ` · ${payload.utm.campaign}` : ""}${payload.utm?.fbclid ? " · Meta click" : ""}${payload.utm?.gclid || payload.utm?.gbraid || payload.utm?.wbraid ? " · Google click" : ""}</p>`
+      ? `<p style="color:#6b7280;font-family:system-ui,sans-serif;font-size:13px;">Source: ${payload.utm?.source ?? "direct"}${payload.utm?.campaign ? ` · ${payload.utm.campaign}` : ""}${payload.utm?.content ? ` · ${payload.utm.content}` : ""}${payload.utm?.fbclid ? " · Meta click" : ""}${payload.utm?.gclid || payload.utm?.gbraid || payload.utm?.wbraid ? " · Google click" : ""}</p>`
       : "",
     payload.pageUrl
       ? `<p style="color:#6b7280;font-family:system-ui,sans-serif;font-size:13px;">Page: ${payload.pageUrl}</p>`
