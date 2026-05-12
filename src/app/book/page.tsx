@@ -129,6 +129,19 @@ export default function BookPage() {
 
       if (data.event !== "calendly.event_scheduled") return;
 
+      // Calendly postMessage payload on scheduling includes URIs to the
+      // event and invitee resources. We forward these to the server so it
+      // can hit Calendly's API and fetch the actual booked time + Meet
+      // link, then forward into the n8n payload.
+      const calendlyData = e.data as {
+        payload?: {
+          event?: { uri?: string };
+          invitee?: { uri?: string };
+        };
+      };
+      const calendlyEventUri = calendlyData.payload?.event?.uri;
+      const calendlyInviteeUri = calendlyData.payload?.invitee?.uri;
+
       const eventId = prefill?.eventId;
       const fbclid = prefill?.utm.fbclid;
 
@@ -173,12 +186,15 @@ export default function BookPage() {
               eventId: prefill.eventId,
               email: prefill.email,
               name: prefill.name,
+              phone: prefill.phone,
               eventType: prefill.eventType,
               guestCount: prefill.guestCount,
               when: prefill.when,
               budget: prefill.budget,
               source: prefill.source,
               utm: prefill.utm,
+              calendlyEventUri,
+              calendlyInviteeUri,
               pageUrl:
                 typeof window !== "undefined" ? window.location.href : undefined,
             }),
@@ -308,6 +324,7 @@ function buildCalendlyEmbedUrl(prefill: BookingPrefill | null): string {
     append("a2", prefill.guestCount);
     append("a3", prefill.when);
     append("a4", prefill.budget);
+    append("a5", prefill.phone);
     append("utm_source", prefill.utm.source);
     append("utm_medium", prefill.utm.medium);
     append("utm_campaign", prefill.utm.campaign);

@@ -25,6 +25,7 @@ interface LeadPayload {
   budget: string;
   name?: string;
   email: string;
+  phone?: string;
   declined?: boolean;
   notes?: string;
   /** Shared event_id used to dedupe the browser pixel Lead fire against the CAPI Lead fire. */
@@ -128,6 +129,7 @@ async function sendOwnerEmail(payload: LeadPayload): Promise<void> {
     row("Budget", payload.budget),
     row("Name", payload.name ?? "(not provided)"),
     row("Email", payload.email),
+    payload.phone ? row("Phone", payload.phone) : "",
     payload.notes ? row("Notes", payload.notes) : "",
     `</table>`,
     payload.utm?.fbclid ||

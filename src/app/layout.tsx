@@ -15,7 +15,20 @@ export const metadata: Metadata = {
   title: "Mobile Craft Bars | Denver Mobile Bar & Craft Cocktails",
   description:
     "Professional bartenders, custom cocktail menus, and full-service setup for weddings, corporate events, and private parties across Denver and the Colorado mountains.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    {
+      rel: "icon",
+      url: "/logo-dark.svg",
+      media: "(prefers-color-scheme: light)",
+      type: "image/svg+xml",
+    },
+    {
+      rel: "icon",
+      url: "/logo-light.svg",
+      media: "(prefers-color-scheme: dark)",
+      type: "image/svg+xml",
+    },
+  ],
   robots: { index: false, follow: false },
 };
 

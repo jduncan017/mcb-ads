@@ -47,6 +47,7 @@ interface Answers {
   budget?: Budget;
   name?: string;
   email?: string;
+  phone?: string;
 }
 
 interface DiscoveryModalProps {
@@ -204,7 +205,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
 
   // ── Submit handlers ─────────────────────────────────────────────────────
   const submitContact = useCallback(
-    async (name: string, email: string) => {
+    async (name: string, email: string, phone: string) => {
       setStep("submitting");
       try {
         const utm = parseUtm(persistedQs);
@@ -227,6 +228,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
             budget: answers.budget,
             name,
             email,
+            phone,
             declined: false,
             utm,
             eventId: leadEventId,
@@ -279,6 +281,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
         stashBookingPrefill({
           name,
           email,
+          phone,
           eventType: answers.eventType,
           guestCount: answers.guestCount,
           when: formatEventDate(answers.when),
@@ -448,6 +451,7 @@ export function DiscoveryModal({ open, buttonId }: DiscoveryModalProps) {
               onSubmit={submitContact}
               defaultName={answers.name}
               defaultEmail={answers.email}
+              defaultPhone={answers.phone}
             />
           )}
           {step === "submitting" && <SubmittingStep />}
@@ -623,18 +627,22 @@ function ContactStep({
   error,
   defaultName,
   defaultEmail,
+  defaultPhone,
   onSubmit,
 }: {
   error: string | null;
   defaultName?: string;
   defaultEmail?: string;
-  onSubmit: (name: string, email: string) => void;
+  defaultPhone?: string;
+  onSubmit: (name: string, email: string, phone: string) => void;
 }) {
   const [name, setName] = useState(defaultName ?? "");
   const [email, setEmail] = useState(defaultEmail ?? "");
+  const [phone, setPhone] = useState(defaultPhone ?? "");
   const [emailError, setEmailError] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     nameRef.current?.focus();
@@ -651,7 +659,8 @@ function ContactStep({
       return;
     }
     setEmailError(null);
-    onSubmit(name.trim(), email.trim());
+    // Phone is optional — submit even if empty.
+    onSubmit(name.trim(), email.trim(), phone.trim());
   }
 
   function handleNameKey(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -663,6 +672,18 @@ function ContactStep({
   }
 
   function handleEmailKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!email.trim() || !isValidEmail(email)) {
+        setEmailError("Please enter a valid email");
+        return;
+      }
+      setEmailError(null);
+      phoneRef.current?.focus();
+    }
+  }
+
+  function handlePhoneKey(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
       handleSubmit();
@@ -700,6 +721,16 @@ function ContactStep({
           placeholder="you@example.com"
           autoComplete="email"
           error={emailError}
+        />
+        <ModalInput
+          label="Phone *"
+          ref={phoneRef}
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          onKeyDown={handlePhoneKey}
+          placeholder="(555) 123-4567"
+          autoComplete="tel"
         />
       </div>
       {error && <p className="mt-4 text-sm text-rose-400">{error}</p>}

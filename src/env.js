@@ -18,6 +18,10 @@ export const env = createEnv({
     LEAD_FROM_EMAIL: z.string().min(1).optional(),
     // n8n webhook URL for post-booking automations. Fire-and-forget POST.
     N8N_BOOKING_WEBHOOK_URL: z.string().url().optional(),
+    // Calendly Personal Access Token. Used server-side to fetch booked
+    // event details (time, location/Meet link) after the postMessage fires.
+    // Generate at: calendly.com/integrations/api_webhooks
+    CALENDLY_API_TOKEN: z.string().min(1).optional(),
   },
 
   /**
@@ -48,6 +52,7 @@ export const env = createEnv({
     LEAD_NOTIFY_EMAIL: process.env.LEAD_NOTIFY_EMAIL,
     LEAD_FROM_EMAIL: process.env.LEAD_FROM_EMAIL,
     N8N_BOOKING_WEBHOOK_URL: process.env.N8N_BOOKING_WEBHOOK_URL,
+    CALENDLY_API_TOKEN: process.env.CALENDLY_API_TOKEN,
     NEXT_PUBLIC_BOOKING_URL: process.env.NEXT_PUBLIC_BOOKING_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

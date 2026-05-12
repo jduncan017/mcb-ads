@@ -18,6 +18,7 @@ export interface BookingPrefill {
   eventId: string;
   name: string;
   email: string;
+  phone?: string;
   eventType?: string;
   guestCount?: string;
   when?: string;

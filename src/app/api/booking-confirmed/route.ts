@@ -38,6 +38,7 @@ interface BookingConfirmedPayload {
   eventId?: string;
   email?: string;
   name?: string;
+  phone?: string;
   eventType?: string;
   guestCount?: string;
   when?: string;
@@ -53,7 +54,27 @@ interface BookingConfirmedPayload {
     gbraid?: string;
     wbraid?: string;
   };
+  /** Calendly resource URIs from postMessage. Used to fetch booked time. */
+  calendlyEventUri?: string;
+  calendlyInviteeUri?: string;
   pageUrl?: string;
+}
+
+interface CalendlyMeeting {
+  /** ISO 8601 — start of the booked consultation call. */
+  startTime?: string;
+  /** ISO 8601 — end of the booked consultation call. */
+  endTime?: string;
+  /** Timezone identifier the invitee picked (e.g. "America/Denver"). */
+  inviteeTimezone?: string;
+  /** Google Meet / Zoom / phone link, depending on event config. */
+  meetingLink?: string;
+  /** "google_conference", "zoom_conf", etc. */
+  locationType?: string;
+  /** Calendly invitee URI (handy for downstream lookups). */
+  inviteeUri?: string;
+  /** Calendly event URI. */
+  eventUri?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -72,6 +93,13 @@ export async function POST(request: NextRequest) {
 
   const { eventId, email, eventType, guestCount, when, budget, source, utm } =
     payload;
+
+  // ── Calendly API: fetch booked meeting details ───────────────────────────
+  // Calendly's postMessage only gives us URIs; we hit the API to resolve them
+  // into actual booking data (start time, Meet link, etc.) so n8n / Sheets /
+  // Zapier downstream have the call time without needing a separate Calendly
+  // → Zapier trigger.
+  const meeting = await fetchCalendlyMeeting(payload);
 
   // ── PostHog: calendly_booked (server-side) ────────────────────────────────
   if (email) {
@@ -111,12 +139,13 @@ export async function POST(request: NextRequest) {
   // killed when the function returns in Vercel.
   const n8nUrl = env.N8N_BOOKING_WEBHOOK_URL;
   if (n8nUrl) {
+    const n8nBody = { ...payload, meeting };
     after(async () => {
       try {
         const res = await fetch(n8nUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(n8nBody),
         });
         if (!res.ok) {
           console.error("[booking-confirmed] n8n webhook non-2xx:", res.status);
@@ -202,6 +231,72 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, meta: true });
+}
+
+async function fetchCalendlyMeeting(
+  payload: BookingConfirmedPayload,
+): Promise<CalendlyMeeting | undefined> {
+  const token = env.CALENDLY_API_TOKEN;
+  const { calendlyEventUri, calendlyInviteeUri } = payload;
+  if (!token || !calendlyEventUri) return undefined;
+
+  try {
+    const eventRes = await fetch(calendlyEventUri, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!eventRes.ok) {
+      console.error(
+        "[booking-confirmed] Calendly event fetch non-2xx:",
+        eventRes.status,
+      );
+      return undefined;
+    }
+    const eventJson = (await eventRes.json()) as {
+      resource?: {
+        start_time?: string;
+        end_time?: string;
+        location?: { type?: string; join_url?: string; location?: string };
+      };
+    };
+
+    const resource = eventJson.resource;
+    // join_url is set for video conferencing (Google Meet, Zoom). location
+    // is set for phone / in-person. Pick whichever is present.
+    const meetingLink =
+      resource?.location?.join_url ?? resource?.location?.location;
+
+    // Invitee fetch is optional — pulls timezone if we want richer formatting
+    // downstream. Skip silently on failure since it's not critical.
+    let inviteeTimezone: string | undefined;
+    if (calendlyInviteeUri) {
+      try {
+        const inviteeRes = await fetch(calendlyInviteeUri, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (inviteeRes.ok) {
+          const inviteeJson = (await inviteeRes.json()) as {
+            resource?: { timezone?: string };
+          };
+          inviteeTimezone = inviteeJson.resource?.timezone;
+        }
+      } catch {
+        // ignore — non-fatal
+      }
+    }
+
+    return {
+      startTime: resource?.start_time,
+      endTime: resource?.end_time,
+      inviteeTimezone,
+      meetingLink,
+      locationType: resource?.location?.type,
+      inviteeUri: calendlyInviteeUri,
+      eventUri: calendlyEventUri,
+    };
+  } catch (err) {
+    console.error("[booking-confirmed] Calendly API fetch failed:", err);
+    return undefined;
+  }
 }
 
 async function hashSHA256(value: string): Promise<string> {
