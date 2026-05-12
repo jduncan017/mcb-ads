@@ -64,6 +64,24 @@ const pricingFacts = [
   { value: "$100/hr", label: "Each exta hour, per bartender" },
 ];
 
+const howItWorks = [
+  {
+    title: "Book your 10-minute call",
+    description:
+      "Pick a time from the calendar. No prep needed — just bring your date, guest count, and any cocktail ideas in mind.",
+  },
+  {
+    title: "Talk through your event",
+    description:
+      "We'll cover menu concepts, ingredients, what's included, and pricing. One call, no follow-up needed for the basics.",
+  },
+  {
+    title: "Get your custom quote",
+    description:
+      "Within 24 hours of the call. Tailored to your guest count, location, and the experience you want to create.",
+  },
+];
+
 const testimonials = [
   {
     quote:
@@ -240,8 +258,41 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section className="section-pad" id="how-it-works">
+        <div className="mx-auto max-w-[1100px]">
+          <FadeIn>
+            <div className="mx-auto mb-10 max-w-[720px] text-center md:mb-14">
+              <Eyebrow className="mb-3">How It Works</Eyebrow>
+              <h2>Three Steps, No Surprises</h2>
+            </div>
+          </FadeIn>
+          <div className="mx-auto grid max-w-[960px] gap-6 md:grid-cols-3 md:gap-8">
+            {howItWorks.map((step, i) => (
+              <FadeIn key={step.title} delay={i * 100}>
+                <Wrapper
+                  rounded="lg"
+                  padding="md"
+                  className="h-full border border-white/10 bg-linear-to-br from-white/[0.04] to-white/[0.01]"
+                >
+                  <div className="bg-primary-300/20 text-primary-100 ring-primary-300/40 mb-4 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ring-1">
+                    {i + 1}
+                  </div>
+                  <h3 className="font-heading mb-2 text-xl tracking-wide text-white">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-neutral-300 md:text-base">
+                    {step.description}
+                  </p>
+                </Wrapper>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing / Qualification */}
-      <section className="section-pad" id="pricing">
+      <section className="section-pad section-gradient" id="pricing">
         <div className="mx-auto max-w-[1200px]">
           <FadeIn>
             <div className="mx-auto mb-10 max-w-[960px] text-center md:mb-14">
