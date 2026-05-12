@@ -659,8 +659,9 @@ function ContactStep({
       return;
     }
     setEmailError(null);
-    // Phone is optional — submit even if empty.
-    onSubmit(name.trim(), email.trim(), phone.trim());
+    // Phone optional — normalize to E.164 (+1XXXXXXXXXX) so Calendly's phone
+    // field doesn't treat raw 10-digit US numbers as a foreign country.
+    onSubmit(name.trim(), email.trim(), normalizeUsPhone(phone));
   }
 
   function handleNameKey(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -992,6 +993,29 @@ function ProgressDots({
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+/**
+ * Normalize a US phone number to E.164 (`+1XXXXXXXXXX`). MCB only serves US
+ * clients, so we always prepend `+1` if missing. Calendly's phone field
+ * treats raw 10-digit numbers as foreign without a country code, which
+ * breaks SMS reminders and HoneyBook contact records.
+ *
+ * - Empty / whitespace → returns empty string (phone is optional)
+ * - 10 digits → `+1XXXXXXXXXX`
+ * - 11 digits starting with `1` → `+1XXXXXXXXXX`
+ * - Already has `+` prefix → returned as-is (trust the user)
+ * - Other lengths → returned with digits only, no prefix (caller may
+ *   choose to show as entered rather than risk wrong country code)
+ */
+function normalizeUsPhone(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("+")) return trimmed;
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return digits;
 }
 
 /** ISO `YYYY-MM-DD` → `Saturday, July 15, 2026`. Used for email + Calendly prefill. */
