@@ -8,6 +8,10 @@ import {
   clearBookingPrefill,
   type BookingPrefill,
 } from "~/lib/booking-prefill";
+import { readAttribution } from "~/lib/attribution";
+
+/** Set once we've fired the conversion so a refresh doesn't double-count. */
+const FIRED_FLAG = "mcb:thankyou-fired";
 
 export default function ThankYouPage() {
   const [prefill, setPrefill] = useState<BookingPrefill | null>(null);
@@ -16,28 +20,62 @@ export default function ThankYouPage() {
     const stash = readBookingPrefill();
     setPrefill(stash);
 
-    // Fire Google Ads conversion. transaction_id = eventId ties this fire
-    // to the booking so any future Enhanced Conversions server-fire dedupes
-    // against it. Skips silently if either env var is missing.
-    const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
-    const conversionLabel = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
-    if (adsId && conversionLabel) {
-      const w = window as unknown as {
-        gtag?: (
-          cmd: string,
-          event: string,
-          params?: Record<string, unknown>,
-        ) => void;
-      };
-      w.gtag?.("event", "conversion", {
-        send_to: `${adsId}/${conversionLabel}`,
-        transaction_id: stash?.eventId,
+    // Only fire conversion tracking when the visitor actually arrived here from
+    // the HoneyBook form submission (redirect set to /thank-you?booked=1).
+    // Organic visits / bookmarks / refreshes must not count as conversions.
+    const booked =
+      new URLSearchParams(window.location.search).get("booked") === "1";
+
+    let alreadyFired = false;
+    try {
+      alreadyFired = sessionStorage.getItem(FIRED_FLAG) === "1";
+    } catch {
+      // sessionStorage unavailable — proceed (worst case a rare double-fire).
+    }
+
+    if (booked && !alreadyFired) {
+      try {
+        sessionStorage.setItem(FIRED_FLAG, "1");
+      } catch {
+        // non-fatal
+      }
+
+      // Fire Google Ads conversion. Skips silently if either env var is missing.
+      const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
+      const conversionLabel =
+        process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
+      if (adsId && conversionLabel) {
+        const w = window as unknown as {
+          gtag?: (
+            cmd: string,
+            event: string,
+            params?: Record<string, unknown>,
+          ) => void;
+        };
+        w.gtag?.("event", "conversion", {
+          send_to: `${adsId}/${conversionLabel}`,
+        });
+      }
+
+      // Notify owner + n8n with the stashed ad attribution. The lead's PII lives
+      // in HoneyBook (which sends its own inquiry notification); this fire is the
+      // attribution layer so the owner/n8n can tie the inquiry to its ad source.
+      const attribution = readAttribution();
+      void fetch("/api/honeybook-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          attribution,
+          pageUrl: window.location.href,
+        }),
+        keepalive: true,
+      }).catch(() => {
+        // fire-and-forget — don't block the confirmation UI on this
       });
     }
 
-    // Clear sessionStorage after we've read it. Prevents a fresh tab
-    // landing on /thank-you from rendering someone else's stale data,
-    // and ensures a hard reload shows the generic confirmation.
+    // Clear booking prefill (legacy modal flow) after reading. Harmless when
+    // absent; keeps a fresh tab from rendering someone else's stale data.
     clearBookingPrefill();
   }, []);
 

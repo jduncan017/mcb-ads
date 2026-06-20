@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Navbar, Footer } from "~/components/layout";
 import { CalButton } from "~/components/CalButton";
+import { HoneyBookEmbed } from "~/components/HoneyBookEmbed";
 import { FadeIn } from "~/components/FadeIn";
 import { Eyebrow } from "~/components/Eyebrow";
 import { Wrapper } from "~/components/Wrapper";
@@ -352,6 +353,31 @@ export default function LandingPage() {
           <CalButton size="lg" arrow className="glow-cta shadow-theme">
             Reserve My Date
           </CalButton>
+        </div>
+      </section>
+
+      {/* Booking form (inline HoneyBook embed) */}
+      <section className="section-pad section-gradient scroll-mt-24" id="book">
+        <div className="mx-auto max-w-[900px]">
+          <FadeIn>
+            <div className="mx-auto mb-10 max-w-[720px] text-center md:mb-14">
+              <Eyebrow className="mb-3">Book Your Event</Eyebrow>
+              <h2>Tell us about your event</h2>
+              <p className="mt-4 text-neutral-200">
+                Fill out the form and we&apos;ll be in touch with a custom quote
+                within 24 hours.
+              </p>
+            </div>
+          </FadeIn>
+          <FadeIn delay={150}>
+            <Wrapper
+              rounded="lg"
+              padding="md"
+              className="border border-white/10 bg-white"
+            >
+              <HoneyBookEmbed />
+            </Wrapper>
+          </FadeIn>
         </div>
       </section>
 

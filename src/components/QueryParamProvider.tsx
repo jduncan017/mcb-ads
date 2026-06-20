@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { useSearchParams } from "next/navigation";
+import { captureAttribution } from "~/lib/attribution";
 
 const QueryParamContext = createContext<string>("");
 
@@ -39,6 +40,9 @@ export function QueryParamProvider({ children }: { children: ReactNode }) {
     if (qs) {
       setPersisted((prev) => prev || qs);
     }
+    // Stash first-touch ad attribution to sessionStorage so it survives the
+    // HoneyBook → /thank-you redirect (which drops URL params).
+    captureAttribution();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

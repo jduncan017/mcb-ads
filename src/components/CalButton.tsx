@@ -1,15 +1,14 @@
 "use client";
 
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { Button } from "~/components/Button";
-import {
-  DiscoveryModal,
-  DiscoveryModalCloseContext,
-} from "~/components/DiscoveryModal";
 import {
   type ButtonVariant,
   type ButtonSize,
 } from "~/components/button-styles";
+
+/** The id of the inline HoneyBook booking section on the funnel page. */
+const BOOKING_ANCHOR_ID = "book";
 
 interface CalButtonProps {
   children: ReactNode;
@@ -26,15 +25,16 @@ interface CalButtonProps {
 }
 
 /**
- * CTA button that opens the discovery-call qualification modal.
+ * Primary CTA button. Scrolls the visitor to the inline HoneyBook booking form
+ * (`#book`) on the funnel page.
  *
- * The modal collects 5 questions (event type, guests, when, budget, contact)
- * and then routes the visitor to Calendly with their answers prefilled. Replaces
- * the old "open Calendly in a new tab" behavior with a higher-conversion
- * progressive flow that filters under-budget leads before they hit the calendar.
+ * NOTE: The DiscoveryModal qualification flow is PAUSED (we removed the
+ * friction while Meta is off and traffic is shifting). The modal code lives in
+ * DiscoveryModal.tsx, untouched — to re-enable it, restore the previous version
+ * of this file (open a modal on click instead of scrolling to `#book`).
  *
- * Analytics: each click fires `cal_modal_opened` with `source` set to the
- * button's visible text (or `label` override). Every CTA on the page must have
+ * Analytics: PostHog autocapture records the click via
+ * `data-ph-capture-attribute-button-text`. Every CTA on the page must have
  * unique text so the events distinguish in PostHog.
  */
 export function CalButton({
@@ -45,9 +45,6 @@ export function CalButton({
   className = "shadow-theme",
   label,
 }: CalButtonProps) {
-  const [open, setOpen] = useState(false);
-  const closeModal = useCallback(() => setOpen(false), []);
-
   const trackingLabel = useMemo(() => {
     if (label) return label;
     if (typeof children === "string") return children;
@@ -55,21 +52,25 @@ export function CalButton({
     return "unlabeled-cal-button";
   }, [label, children]);
 
+  const scrollToForm = useCallback(() => {
+    const el = document.getElementById(BOOKING_ANCHOR_ID);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
   return (
-    <DiscoveryModalCloseContext.Provider value={closeModal}>
-      <Button
-        as="button"
-        type="button"
-        variant={variant}
-        size={size}
-        arrow={arrow}
-        className={className}
-        onClick={() => setOpen(true)}
-        data-ph-capture-attribute-button-text={trackingLabel}
-      >
-        {children}
-      </Button>
-      <DiscoveryModal open={open} buttonId={trackingLabel} />
-    </DiscoveryModalCloseContext.Provider>
+    <Button
+      as="button"
+      type="button"
+      variant={variant}
+      size={size}
+      arrow={arrow}
+      className={className}
+      onClick={scrollToForm}
+      data-ph-capture-attribute-button-text={trackingLabel}
+    >
+      {children}
+    </Button>
   );
 }
