@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Script from "next/script";
+import { analytics } from "~/lib/analytics";
 
 /**
  * HoneyBook website-placement contact form, embedded inline.
@@ -19,9 +21,51 @@ import Script from "next/script";
 const HB_PID = "697d2a1284c5890030c7012e";
 
 export function HoneyBookEmbed() {
+  const placementRef = useRef<HTMLDivElement>(null);
+
+  // Instrumentation around the cross-origin iframe blind spot:
+  // - honeybook_embed_loaded: HoneyBook's placement controller injected the
+  //   form (iframe appeared inside the placement div).
+  // - honeybook_form_viewed: visitor actually scrolled the form into view.
+  useEffect(() => {
+    const el = placementRef.current;
+    if (!el) return;
+
+    let loadedFired = false;
+    const mutationObserver = new MutationObserver(() => {
+      if (!loadedFired && el.querySelector("iframe")) {
+        loadedFired = true;
+        analytics.honeybookEmbedLoaded();
+        mutationObserver.disconnect();
+      }
+    });
+    mutationObserver.observe(el, { childList: true, subtree: true });
+
+    let viewedFired = false;
+    // 0.25 threshold: the rendered form can be taller than the viewport, so
+    // requiring 50%+ visibility would never fire on mobile. A quarter visible
+    // reliably means the visitor scrolled to the form.
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        if (!viewedFired && entries.some((e) => e.isIntersecting)) {
+          viewedFired = true;
+          analytics.honeybookFormViewed();
+          intersectionObserver.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    intersectionObserver.observe(el);
+
+    return () => {
+      mutationObserver.disconnect();
+      intersectionObserver.disconnect();
+    };
+  }, []);
+
   return (
     <>
-      <div className={`hb-p-${HB_PID}-1`} />
+      <div ref={placementRef} className={`hb-p-${HB_PID}-1`} />
       {/* HoneyBook tracking pixel — must stay a raw 1x1 img, not next/image */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

@@ -2,6 +2,7 @@
 
 import { type ReactNode, useCallback, useMemo } from "react";
 import { Button } from "~/components/Button";
+import { analytics } from "~/lib/analytics";
 import {
   type ButtonVariant,
   type ButtonSize,
@@ -53,11 +54,12 @@ export function CalButton({
   }, [label, children]);
 
   const scrollToForm = useCallback(() => {
+    analytics.ctaClicked(trackingLabel);
     const el = document.getElementById(BOOKING_ANCHOR_ID);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, []);
+  }, [trackingLabel]);
 
   return (
     <Button

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { type ReactNode } from "react";
@@ -31,11 +30,14 @@ export function Navbar({
       {/* Top bar */}
       <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-2 md:px-8 md:py-4">
         {/* Logo */}
-        <Link href={appendQueryString("/", qs)} className="flex shrink-0 items-center">
+        <Link
+          href={appendQueryString("/", qs)}
+          className="flex shrink-0 items-center"
+        >
           <Image
             src="/logo.png"
             alt="Logo"
-            className="h-12 w-auto md:h-20"
+            className="h-14 w-auto"
             width={120}
             height={32}
             priority

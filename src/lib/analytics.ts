@@ -54,4 +54,32 @@ export const analytics = {
   }) {
     posthog.capture("lead_submitted", props);
   },
+
+  // --- HoneyBook inline-form era (June 2026+) ---
+  // The HoneyBook embed is a cross-origin iframe, so we can't see field-level
+  // interaction. These events bracket the blind spot: CTA click -> form loaded
+  // -> form seen -> (HoneyBook redirect to /thank-you?booked=1 = submit).
+
+  /**
+   * Fires when any CalButton CTA is clicked (now scrolls to #book).
+   * `source` is the rendered button text so funnels can break down by CTA.
+   */
+  ctaClicked(source: string) {
+    posthog.capture("cta_clicked", { source });
+  },
+
+  /** Fires once when the HoneyBook placement iframe renders into the page. */
+  honeybookEmbedLoaded() {
+    posthog.capture("honeybook_embed_loaded");
+  },
+
+  /** Fires once when the HoneyBook form scrolls meaningfully into view. */
+  honeybookFormViewed() {
+    posthog.capture("honeybook_form_viewed");
+  },
+
+  /** Fires once per depth milestone (25/50/75/100) per pageview. */
+  scrollDepthReached(depth: number) {
+    posthog.capture("scroll_depth_reached", { depth });
+  },
 };

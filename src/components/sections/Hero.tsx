@@ -8,6 +8,8 @@ interface HeroProps {
   heading: ReactNode;
   description: string;
   cta: ReactNode;
+  /** Optional content rendered directly under the CTA (e.g. a proof line). */
+  belowCta?: ReactNode;
   image?: string;
   screenshotDescription?: string;
 }
@@ -17,6 +19,7 @@ export function Hero({
   heading,
   description,
   cta,
+  belowCta,
   image = "/product/script-upload.jpg",
   screenshotDescription,
 }: HeroProps) {
@@ -34,6 +37,7 @@ export function Hero({
           <div className="mt-4 flex w-full max-w-[520px] flex-col gap-4 sm:w-auto sm:flex-row">
             {cta}
           </div>
+          {belowCta}
         </FadeIn>
 
         {/* Product image */}

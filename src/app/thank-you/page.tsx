@@ -23,8 +23,15 @@ export default function ThankYouPage() {
     // Only fire conversion tracking when the visitor actually arrived here from
     // the HoneyBook form submission (redirect set to /thank-you?booked=1).
     // Organic visits / bookmarks / refreshes must not count as conversions.
-    const booked =
-      new URLSearchParams(window.location.search).get("booked") === "1";
+    //
+    // Tolerant match: HoneyBook's redirect config is hand-typed, and a pasted
+    // stray character once shipped as `booked=1%60` (trailing backtick), which
+    // silently dropped real conversions. Accept any value that STARTS with "1"
+    // so config typos degrade gracefully instead of zeroing out reporting.
+    const bookedParam = new URLSearchParams(window.location.search).get(
+      "booked",
+    );
+    const booked = bookedParam?.startsWith("1") ?? false;
 
     let alreadyFired = false;
     try {
