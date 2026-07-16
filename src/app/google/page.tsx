@@ -150,7 +150,7 @@ export default function GoogleLandingPage() {
           </CalButton>
         }
         belowCta={
-          <p className="mt-5 max-w-xl text-sm text-neutral-300">
+          <p className="mt-5 max-w-xl text-sm text-neutral-200">
             Hire some of Denver&apos;s best bartenders — from bars like{" "}
             <span className="font-semibold text-white">Death &amp; Co</span>,{" "}
             <span className="font-semibold text-white">
@@ -214,7 +214,7 @@ export default function GoogleLandingPage() {
                         <h4 className="font-heading mb-1 text-xl tracking-wide text-white">
                           {step.title}
                         </h4>
-                        <p className="text-sm leading-relaxed text-neutral-300">
+                        <p className="text-sm leading-relaxed text-neutral-200">
                           {step.description}
                         </p>
                       </div>
@@ -234,7 +234,7 @@ export default function GoogleLandingPage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-sm leading-loose text-neutral-200/80 italic">
+              <p className="mt-4 text-sm leading-loose text-neutral-200 italic">
                 Packages from $800 including 3 hours of service. Travel fees
                 apply outside Denver metro.
               </p>
@@ -284,7 +284,7 @@ export default function GoogleLandingPage() {
                       <Icon className="text-primary-200 mt-0.5 h-5 w-5 shrink-0" />
                       <div>
                         <p className="font-semibold text-white">{label}</p>
-                        <p className="text-sm text-neutral-300">{note}</p>
+                        <p className="text-sm text-neutral-200">{note}</p>
                       </div>
                     </li>
                   ))}
@@ -306,7 +306,7 @@ export default function GoogleLandingPage() {
                       <Icon className="text-primary-200 mt-0.5 h-5 w-5 shrink-0" />
                       <div>
                         <p className="font-semibold text-white">{label}</p>
-                        <p className="text-sm text-neutral-300">{note}</p>
+                        <p className="text-sm text-neutral-200">{note}</p>
                       </div>
                     </li>
                   ))}

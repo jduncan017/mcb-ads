@@ -88,8 +88,14 @@ export function HoneyBookEmbed() {
 
     let loadedFired = false;
     const mutationObserver = new MutationObserver(() => {
-      if (!loadedFired && el.querySelector("iframe")) {
+      const iframe = el.querySelector("iframe");
+      if (!loadedFired && iframe) {
         loadedFired = true;
+        // HoneyBook's injected iframe ships with no title, which fails an
+        // accessibility check. Label it so screen readers announce it.
+        if (!iframe.getAttribute("title")) {
+          iframe.setAttribute("title", "Event booking form");
+        }
         analytics.honeybookEmbedLoaded();
         mutationObserver.disconnect();
       }

@@ -83,18 +83,25 @@ export function Testimonials({
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <div className="flex gap-2">
+            <div className="flex gap-1">
               {testimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => scrollTo(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === activeIdx
-                      ? "bg-primary-300 w-6"
-                      : "w-2 bg-neutral-300/40"
-                  }`}
+                  // 32px flex hit area satisfies tap-target sizing; the visible
+                  // dot stays small inside it.
+                  className="flex h-8 w-8 items-center justify-center"
                   aria-label={`Go to testimonial ${i + 1}`}
-                />
+                  aria-current={i === activeIdx ? "true" : undefined}
+                >
+                  <span
+                    className={`h-2 rounded-full transition-all ${
+                      i === activeIdx
+                        ? "bg-primary-300 w-6"
+                        : "w-2 bg-neutral-200/60"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
             <button
