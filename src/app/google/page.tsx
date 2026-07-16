@@ -160,6 +160,7 @@ export default function GoogleLandingPage() {
           </p>
         }
         image="/action-shots/hitch-lake.webp"
+        priorityImage
       />
 
       {/* Booking form + how it works — centered header, then two columns on

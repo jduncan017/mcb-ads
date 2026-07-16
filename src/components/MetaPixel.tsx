@@ -11,10 +11,13 @@ export function MetaPixel() {
 
   return (
     <>
-      {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
+      {/* lazyOnload: the pixel loads during browser idle time, after the page
+          is interactive, so Facebook's fbevents.js stops inflating mobile Total
+          Blocking Time. PageView still fires; it's just slightly later, which is
+          fine for a pixel (and Meta campaigns are paused anyway). */}
       <Script
         id="meta-pixel"
-        strategy="beforeInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)

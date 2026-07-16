@@ -12,6 +12,8 @@ interface HeroProps {
   belowCta?: ReactNode;
   image?: string;
   screenshotDescription?: string;
+  /** Preload the hero image as the LCP element. Set on ad landing pages. */
+  priorityImage?: boolean;
 }
 
 export function Hero({
@@ -22,6 +24,7 @@ export function Hero({
   belowCta,
   image = "/product/script-upload.jpg",
   screenshotDescription,
+  priorityImage = false,
 }: HeroProps) {
   return (
     <section className="section-pad relative overflow-hidden">
@@ -46,6 +49,7 @@ export function Hero({
             src={image}
             alt={screenshotDescription ?? "Mobile Craft Bars setup"}
             direction="right"
+            priority={priorityImage}
           />
         </FadeIn>
       </div>

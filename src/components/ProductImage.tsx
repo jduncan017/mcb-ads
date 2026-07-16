@@ -10,6 +10,11 @@ interface ProductImageProps {
   className?: string;
   objectFit?: "cover" | "contain";
   sizes?: string;
+  /**
+   * Set true only for an above-the-fold hero image so Next preloads it and it
+   * paints as the LCP element quickly. Never set on below-the-fold images.
+   */
+  priority?: boolean;
 }
 
 export function ProductImage({
@@ -20,6 +25,7 @@ export function ProductImage({
   className = "",
   objectFit = "cover",
   sizes = "(max-width: 1024px) 100vw, 50vw",
+  priority = false,
 }: ProductImageProps) {
   return (
     <div
@@ -31,6 +37,7 @@ export function ProductImage({
         alt={alt}
         fill
         sizes={sizes}
+        priority={priority}
         className={objectFit === "cover" ? "object-cover" : "object-contain"}
       />
     </div>
