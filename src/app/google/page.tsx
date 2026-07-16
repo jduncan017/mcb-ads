@@ -124,6 +124,24 @@ const testimonials = [
 export default function GoogleLandingPage() {
   return (
     <main className="flex min-h-screen flex-col overflow-x-clip">
+      {/* Warm the connection to HoneyBook's hosts so the lazy-loaded booking
+          form (widget + iframe assets on CloudFront) streams in faster once it
+          scrolls into view. React 19 hoists these to <head>. */}
+      <link rel="preconnect" href="https://widget.honeybook.com" />
+      <link
+        rel="preconnect"
+        href="https://d25purrcgqtc5w.cloudfront.net"
+        crossOrigin=""
+      />
+
+      {/* Skip link for keyboard / screen-reader users. */}
+      <a
+        href="#book"
+        className="focus:bg-primary-300 sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:px-4 focus:py-2 focus:text-black"
+      >
+        Skip to booking form
+      </a>
+
       <ScrollDepthTracker />
 
       {/* Navbar */}

@@ -16,6 +16,17 @@ export function FadeIn({ children, delay = 0, className = "" }: FadeInProps) {
     const el = ref.current;
     if (!el) return;
 
+    // Accessibility: honor prefers-reduced-motion. Also a safety net — if
+    // IntersectionObserver is unavailable, show content instead of leaving it
+    // stuck at opacity 0.
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
