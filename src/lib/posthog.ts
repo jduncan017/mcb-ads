@@ -16,6 +16,9 @@ export function initPostHog() {
     capture_pageview: false, // we handle this manually in the provider
     capture_pageleave: true,
     persistence: "localStorage+cookie",
+    // We don't use PostHog Surveys, so don't download the surveys.js bundle
+    // (~34 KiB + main-thread cost) on every page.
+    disable_surveys: true,
   });
 }
 
