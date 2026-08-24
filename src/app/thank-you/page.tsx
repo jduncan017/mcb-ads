@@ -41,12 +41,6 @@ export default function ThankYouPage() {
     }
 
     if (booked && !alreadyFired) {
-      try {
-        sessionStorage.setItem(FIRED_FLAG, "1");
-      } catch {
-        // non-fatal
-      }
-
       const attribution = readAttribution();
       const adAttributed = isAdAttributed(attribution);
 
@@ -62,15 +56,28 @@ export default function ThankYouPage() {
         process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
       if (adAttributed && adsId && conversionLabel) {
         const w = window as unknown as {
-          gtag?: (
-            cmd: string,
-            event: string,
-            params?: Record<string, unknown>,
-          ) => void;
+          gtag?: (...args: unknown[]) => void;
+          dataLayer?: unknown[];
         };
-        w.gtag?.("event", "conversion", {
-          send_to: `${adsId}/${conversionLabel}`,
-        });
+        const payload = { send_to: `${adsId}/${conversionLabel}` };
+
+        if (typeof w.gtag === "function") {
+          w.gtag("event", "conversion", payload);
+        } else {
+          // Fallback if the head stub somehow didn't run. Queue in gtag's own
+          // arguments format (["event", name, params]) — NOT a GTM-style object,
+          // which gtag.js would ignore — so the loader replays it on arrival.
+          w.dataLayer = w.dataLayer ?? [];
+          w.dataLayer.push(["event", "conversion", payload]);
+        }
+      }
+
+      // Mark fired only AFTER the push. If anything above threw, a reload gets
+      // another chance instead of the flag permanently suppressing the retry.
+      try {
+        sessionStorage.setItem(FIRED_FLAG, "1");
+      } catch {
+        // non-fatal
       }
 
       // Notify owner + n8n regardless of channel — the owner wants to know about

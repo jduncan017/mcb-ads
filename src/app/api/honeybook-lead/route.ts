@@ -27,9 +27,24 @@ import { env } from "~/env";
 const ALLOWED_ORIGINS = new Set([
   "https://book.mobilecraftbars.com",
   "https://www.mobilecraftbars.com",
+  // Apex (no www) — the privacy/terms pages link here, and a visitor arriving
+  // on the apex would otherwise 403 with no owner email and no n8n ping.
+  "https://mobilecraftbars.com",
   "http://localhost:3000",
   "http://localhost:3001",
 ]);
+
+/** Vercel preview deployments: https://<project>-<hash>-<scope>.vercel.app */
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return protocol === "https:" && hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
 
 interface Attribution {
   source?: string;
@@ -53,7 +68,7 @@ interface HoneyBookLeadPayload {
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+  if (!isAllowedOrigin(origin)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

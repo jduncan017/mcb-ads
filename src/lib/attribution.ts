@@ -31,6 +31,23 @@ export interface Attribution {
   capturedAt: number;
 }
 
+/**
+ * True if the record carries a real ad CLICK ID.
+ *
+ * Uses falsy checks, not `??`. An empty string is a present-but-useless value:
+ * `a.gclid ?? a.gbraid` on `{gclid: "", gbraid: "X"}` returns "" and wrongly
+ * reports unattributed, which happens for real on URLs like `?gclid=&gbraid=X`.
+ */
+function hasClickId(a: Attribution | null | undefined): boolean {
+  if (!a) return false;
+  return (
+    Boolean(a.gclid) ||
+    Boolean(a.gbraid) ||
+    Boolean(a.wbraid) ||
+    Boolean(a.fbclid)
+  );
+}
+
 /** Ad-click / campaign params. If any is present the visit is attributable. */
 const AD_PARAM_KEYS = [
   "gclid",
@@ -70,23 +87,21 @@ export function captureAttribution(): void {
     // Guard 2: keep the existing stash unless this visit is a genuine upgrade.
     const existingRaw = sessionStorage.getItem(KEY);
     if (existingRaw) {
-      let existingHasAdParams = false;
+      let existingHasClickId = false;
       try {
         const existing = JSON.parse(existingRaw) as Attribution;
-        existingHasAdParams = Boolean(
-          existing.gclid ??
-            existing.gbraid ??
-            existing.wbraid ??
-            existing.fbclid ??
-            existing.source ??
-            existing.medium ??
-            existing.campaign,
-        );
+        // Only a real CLICK ID blocks an upgrade. Previously this also counted
+        // source/medium/campaign, which broke the stated intent: a visitor who
+        // arrived with utm_source but no gclid stored {source:"google"}, and a
+        // later genuine ad click in the same tab was then refused as "already
+        // attributed" — so the gclid was never stored and the conversion never
+        // fired. Uses hasClickId (falsy check) so an empty "" doesn't count.
+        existingHasClickId = hasClickId(existing);
       } catch {
         // Corrupt stash — treat as empty so it gets replaced.
       }
-      // Already attributed, or nothing better on offer: leave it alone.
-      if (existingHasAdParams || !currentHasAdParams) return;
+      // Already has a click id, or this visit offers nothing better: leave it.
+      if (existingHasClickId || !currentHasAdParams) return;
     }
 
     const attribution: Attribution = {
@@ -140,7 +155,12 @@ export function isAdAttributed(
   attribution: Attribution | null | undefined,
 ): boolean {
   if (!attribution) return false;
-  return Boolean(
-    attribution.gclid ?? attribution.gbraid ?? attribution.wbraid,
+  // GOOGLE click ids only — deliberately excludes fbclid, since a Meta click
+  // must never fire a Google Ads conversion. Falsy checks, not `??`, so an
+  // empty `?gclid=` doesn't read as attributed.
+  return (
+    Boolean(attribution.gclid) ||
+    Boolean(attribution.gbraid) ||
+    Boolean(attribution.wbraid)
   );
 }
