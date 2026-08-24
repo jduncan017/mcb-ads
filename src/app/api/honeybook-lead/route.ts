@@ -85,14 +85,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // ── n8n webhook (attribution only) ───────────────────────────────────────
+  // ── n8n webhook ──────────────────────────────────────────────────────────
+  // Payload is FLAT and every field is a non-empty string. Downstream Slack
+  // nodes map fields directly, and an unknown value renders as "Not provided"
+  // rather than a blank line — an alert full of empty fields reads like broken
+  // tooling. Note we still cannot send name/email/phone: those are typed into
+  // HoneyBook's cross-origin iframe and are unreadable from this site. The
+  // alert's job is "a lead just landed, here's where it came from, go look."
   const n8nUrl = env.N8N_BOOKING_WEBHOOK_URL;
   if (n8nUrl) {
-    const body = {
-      event: "honeybook_lead",
-      attribution,
-      pageUrl: payload.pageUrl,
-    };
+    const body = buildLeadNotification(attribution, payload.pageUrl);
     after(async () => {
       try {
         const res = await fetch(n8nUrl, {
@@ -110,6 +112,93 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+const NOT_PROVIDED = "Not provided";
+
+/** Coerce any possibly-undefined attribution value into a displayable string. */
+function display(value: string | undefined): string {
+  const trimmed = value?.trim();
+  // Explicit falsy check (not `??`): an empty string must also fall back.
+  if (!trimmed) return NOT_PROVIDED;
+  return trimmed;
+}
+
+/**
+ * Build the flat, always-populated lead notification payload for n8n/Slack.
+ *
+ * Design rules:
+ * - No nested objects. n8n Slack nodes map top-level fields most easily.
+ * - No undefined/empty values. Anything unknown becomes "Not provided".
+ * - Includes a ready-to-post `summary` line so a Slack node can be wired to a
+ *   single field and still produce a useful message.
+ */
+function buildLeadNotification(
+  attribution: Attribution | undefined,
+  pageUrl: string | undefined,
+) {
+  const now = new Date();
+
+  const gclid = attribution?.gclid ?? attribution?.gbraid ?? attribution?.wbraid;
+  const isGoogleAds = Boolean(gclid);
+  const isMeta = Boolean(attribution?.fbclid);
+
+  // Did this visitor come through OUR ad funnel at all? The HoneyBook form is
+  // also embedded on the main website (www.mobilecraftbars.com/contact) and its
+  // post-submit redirect points here regardless of where it was filled in, so a
+  // lead with no ad click and no funnel landing page came from somewhere else.
+  const cameThroughFunnel = Boolean(attribution?.landingUrl);
+
+  // Human-readable channel. utm_source is the fallback when there's no click id.
+  let leadSource: string;
+  if (isGoogleAds) leadSource = "Google Ads";
+  else if (isMeta) leadSource = "Meta Ads";
+  else if (attribution?.source) leadSource = attribution.source;
+  else if (cameThroughFunnel) leadSource = "Direct / organic (ad funnel page)";
+  else leadSource = "Main website or direct HoneyBook link";
+
+  const keyword = display(attribution?.term);
+  const campaign = display(attribution?.campaign);
+
+  // One-line message a Slack node can post as-is. Says plainly which channel
+  // produced the lead so an off-funnel lead reads as information, not a failure.
+  let summary: string;
+  if (isGoogleAds) {
+    const kw = keyword !== NOT_PROVIDED ? ` (keyword: ${keyword})` : "";
+    summary = `New lead from Google Ads${kw}. Full details in HoneyBook.`;
+  } else if (isMeta) {
+    summary = `New lead from Meta Ads. Full details in HoneyBook.`;
+  } else if (cameThroughFunnel) {
+    summary = `New lead from the ad landing page, but with no ad click recorded (direct or organic visit). Full details in HoneyBook.`;
+  } else {
+    summary = `New lead, not from the ad funnel. Most likely the main website contact form or a direct HoneyBook link. Full details in HoneyBook.`;
+  }
+
+  return {
+    event: "honeybook_lead",
+    summary,
+    leadSource,
+    isGoogleAds,
+    cameThroughFunnel,
+    // True only for a billable ad click. Drives whether the Google Ads
+    // conversion fired on /thank-you, so Slack and Google agree.
+    attributed: isGoogleAds || isMeta,
+    campaign,
+    keyword,
+    adContent: display(attribution?.content),
+    medium: display(attribution?.medium),
+    gclid: display(gclid),
+    landingPage: display(attribution?.landingUrl),
+    referrer: display(attribution?.referrer),
+    submittedAt: now.toISOString(),
+    submittedAtDenver: now.toLocaleString("en-US", {
+      timeZone: "America/Denver",
+      dateStyle: "medium",
+      timeStyle: "short",
+    }),
+    pageUrl: display(pageUrl),
+    nextStep: "Open HoneyBook to see the lead's name, email, and event details.",
+  };
 }
 
 async function sendOwnerEmail(

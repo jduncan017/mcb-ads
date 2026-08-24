@@ -8,7 +8,7 @@ import {
   clearBookingPrefill,
   type BookingPrefill,
 } from "~/lib/booking-prefill";
-import { readAttribution } from "~/lib/attribution";
+import { readAttribution, isAdAttributed } from "~/lib/attribution";
 
 /** Set once we've fired the conversion so a refresh doesn't double-count. */
 const FIRED_FLAG = "mcb:thankyou-fired";
@@ -47,11 +47,20 @@ export default function ThankYouPage() {
         // non-fatal
       }
 
-      // Fire Google Ads conversion. Skips silently if either env var is missing.
+      const attribution = readAttribution();
+      const adAttributed = isAdAttributed(attribution);
+
+      // Fire the Google Ads conversion ONLY for real ad clicks.
+      //
+      // The HoneyBook form's redirect is configured on the form itself, and the
+      // same form is embedded on the main website. Those submissions also land
+      // here, so firing unconditionally reported non-ad leads as ad conversions.
+      // Gating on a click id (gclid/gbraid/wbraid) keeps Google Ads reporting
+      // honest. Skips silently if either env var is missing.
       const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
       const conversionLabel =
         process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
-      if (adsId && conversionLabel) {
+      if (adAttributed && adsId && conversionLabel) {
         const w = window as unknown as {
           gtag?: (
             cmd: string,
@@ -64,10 +73,9 @@ export default function ThankYouPage() {
         });
       }
 
-      // Notify owner + n8n with the stashed ad attribution. The lead's PII lives
-      // in HoneyBook (which sends its own inquiry notification); this fire is the
-      // attribution layer so the owner/n8n can tie the inquiry to its ad source.
-      const attribution = readAttribution();
+      // Notify owner + n8n regardless of channel — the owner wants to know about
+      // EVERY lead, ad-driven or not. The payload labels which channel it came
+      // from. The lead's PII lives in HoneyBook (which sends its own notification).
       void fetch("/api/honeybook-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

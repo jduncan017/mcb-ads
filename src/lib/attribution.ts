@@ -31,18 +31,63 @@ export interface Attribution {
   capturedAt: number;
 }
 
+/** Ad-click / campaign params. If any is present the visit is attributable. */
+const AD_PARAM_KEYS = [
+  "gclid",
+  "gbraid",
+  "wbraid",
+  "fbclid",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+] as const;
+
 /**
- * Capture attribution from the current URL. First-touch: once stored, repeat
- * calls (e.g. client navigation to another page) are no-ops so we keep the
- * params from the ad-click landing rather than overwriting with a bare path.
+ * Capture attribution from the current URL. First-touch by default, with two
+ * guards learned the hard way:
+ *
+ * 1. Never capture on /thank-you. That page is the POST-submission destination
+ *    reached via HoneyBook's redirect, which strips all params. Capturing there
+ *    stores an empty attribution and — under the old first-touch-only rule —
+ *    permanently locked it in, so a later real ad click could never overwrite
+ *    it. That produced owner/Slack notifications with blank source fields.
+ *
+ * 2. Allow an "upgrade". If a stash already exists but has NO ad params, and the
+ *    current URL DOES, overwrite it. A real ad click should always beat a
+ *    previously recorded direct/organic visit in the same tab session.
  */
 export function captureAttribution(): void {
   if (typeof window === "undefined") return;
   try {
-    if (sessionStorage.getItem(KEY)) return;
+    // Guard 1: /thank-you can never be a legitimate attribution landing page.
+    if (window.location.pathname.startsWith("/thank-you")) return;
 
     const params = new URLSearchParams(window.location.search);
     const get = (k: string) => params.get(k) ?? undefined;
+
+    const currentHasAdParams = AD_PARAM_KEYS.some((k) => params.get(k));
+
+    // Guard 2: keep the existing stash unless this visit is a genuine upgrade.
+    const existingRaw = sessionStorage.getItem(KEY);
+    if (existingRaw) {
+      let existingHasAdParams = false;
+      try {
+        const existing = JSON.parse(existingRaw) as Attribution;
+        existingHasAdParams = Boolean(
+          existing.gclid ??
+            existing.gbraid ??
+            existing.wbraid ??
+            existing.fbclid ??
+            existing.source ??
+            existing.medium ??
+            existing.campaign,
+        );
+      } catch {
+        // Corrupt stash — treat as empty so it gets replaced.
+      }
+      // Already attributed, or nothing better on offer: leave it alone.
+      if (existingHasAdParams || !currentHasAdParams) return;
+    }
 
     const attribution: Attribution = {
       source: get("utm_source"),
@@ -76,4 +121,26 @@ export function readAttribution(): Attribution | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * True when this visitor arrived from a paid ad click we can attribute.
+ *
+ * Why this matters: the HoneyBook form's post-submit redirect is configured on
+ * the FORM, not per-embed. The same form is also embedded on the main website
+ * (www.mobilecraftbars.com/contact), so those submissions ALSO land on our
+ * /thank-you page. Without this check we fire a Google Ads conversion for leads
+ * that never touched an ad — Google discards them (no gclid) but it pollutes
+ * reporting and makes the funnel look like it produced leads it didn't.
+ *
+ * Only a real click identifier counts. utm_source alone is not enough: it can
+ * be hand-set on any link and does not represent a billable ad click.
+ */
+export function isAdAttributed(
+  attribution: Attribution | null | undefined,
+): boolean {
+  if (!attribution) return false;
+  return Boolean(
+    attribution.gclid ?? attribution.gbraid ?? attribution.wbraid,
+  );
 }
