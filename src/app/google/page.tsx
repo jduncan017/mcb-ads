@@ -39,6 +39,14 @@ import { Hero, Testimonials } from "~/components/sections";
 
 const siteName = "Mobile Craft Bars";
 
+/**
+ * Full-service inquiry form (HoneyBook placement 5). Dedicated to this page:
+ * the main site's contact form was split onto its own placement so main-site
+ * submissions stop redirecting through our /thank-you page and inflating the
+ * funnel's numbers. Placement 4 is the staffing form on /staffing.
+ */
+const GOOGLE_PLACEMENT = 5;
+
 const eventTypes = [
   {
     icon: Heart,
@@ -127,7 +135,7 @@ export default function GoogleLandingPage() {
       {/* Skip link for keyboard / screen-reader users. */}
       <a
         href="#book"
-        className="focus:bg-primary-300 sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:px-4 focus:py-2 focus:text-black"
+        className="focus:bg-primary-300 sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded focus:px-4 focus:py-2 focus:text-black"
       >
         Skip to booking form
       </a>
@@ -192,7 +200,7 @@ export default function GoogleLandingPage() {
               padding="md"
               className="border border-white/10 bg-white"
             >
-              <HoneyBookEmbed />
+              <HoneyBookEmbed placement={GOOGLE_PLACEMENT} />
             </Wrapper>
           </FadeIn>
 

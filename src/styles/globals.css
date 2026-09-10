@@ -18,7 +18,8 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-heading:
     var(--font-heading-face), ui-serif, Georgia, "Times New Roman", serif;
-  --font-mono: var(--font-mono-face), "Courier Prime", ui-monospace, monospace;
+  /* No webfont: nothing in the app applies `font-mono`. System stack only. */
+  --font-mono: ui-monospace, "Courier Prime", monospace;
 
   /*
    * Type scale — golden ratio (×1.618) from 16px base
@@ -40,11 +41,20 @@
   --font-size-3xl: 6.854rem;
   --font-size-3xl--line-height: 7.5rem;
 
-  /* Primary — MCB steel blue (matches logo gradient) */
-  --color-primary-100: #eaf1fa;
-  --color-primary-200: #a6c7e8;
-  --color-primary-300: #6590c3;
-  --color-primary-400: #2d4e7a;
+  /*
+   * Primary — sampled directly from the live site (mobilecraftbars.com), so
+   * the ad funnel and the main site read as one brand. Previous values were a
+   * desaturated steel blue guessed from the logo; these are the real ones:
+   *   200 <- #80c0ed  link + accent text
+   *   300 <- #3e88bd  primary brand blue (step markers, accent fills)
+   *   400 <- #0e64a1  deep blue used on section labels
+   * Note 300 as a button fill under white text measures ~3.8:1, up from ~3.3:1
+   * on the old value, so this is also a small contrast improvement.
+   */
+  --color-primary-100: #f2f8ff;
+  --color-primary-200: #80c0ed;
+  --color-primary-300: #3e88bd;
+  --color-primary-400: #0e64a1;
 
   /* Secondary — warm amber accent (cocktail/craft vibe) */
   --color-secondary-100: #fdf4e3;
@@ -173,13 +183,27 @@
   }
 }
 
+/*
+ * CTA glow.
+ *
+ * This used to animate `box-shadow` directly, which the browser cannot put on
+ * the compositor: every frame of a 2s infinite loop forced a repaint of the
+ * button and its surroundings, forever, on the primary CTA. Lighthouse flagged
+ * it under "avoid non-composited animations".
+ *
+ * Now the glow lives on a ::after pseudo-element with a STATIC box-shadow, and
+ * only its `opacity` animates. Opacity is compositor-driven, so the pulse runs
+ * off the main thread and costs effectively nothing.
+ *
+ * rgba below is --color-primary-300 (#3e88bd) expanded; keep in sync.
+ */
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(101, 144, 195, 0.3);
+    opacity: 0.55;
   }
   50% {
-    box-shadow: 0 0 30px rgba(101, 144, 195, 0.5);
+    opacity: 1;
   }
 }
 
@@ -191,10 +215,35 @@
   }
   .card-hover:hover {
     transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 8px 30px rgba(101, 144, 195, 0.15);
+    box-shadow: 0 8px 30px rgba(62, 136, 189, 0.15);
   }
   .glow-cta {
+    position: relative;
+  }
+  .glow-cta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 26px 2px rgba(62, 136, 189, 0.55);
     animation: glow-pulse 2s ease-in-out infinite;
+    /*
+     * Deliberately NO `z-index: -1`. The parent is `position: relative` with
+     * z-index auto, so it forms no stacking context, and a negative z-index
+     * child would be painted behind the nearest ancestor that does — i.e.
+     * behind an opaque section background, making the glow invisible.
+     * Painting on top is safe instead: an outer box-shadow is clipped to
+     * outside the border box, and this element has no background of its own,
+     * so it never covers the label. pointer-events:none keeps clicks working.
+     */
+    pointer-events: none;
+  }
+  /* Respect reduced-motion: keep the glow, drop the pulsing. */
+  @media (prefers-reduced-motion: reduce) {
+    .glow-cta::after {
+      animation: none;
+      opacity: 0.7;
+    }
   }
   .gradient-orb {
     position: absolute;
@@ -225,5 +274,4 @@
     border-bottom: 1px solid var(--section-border);
     box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
   }
-
 }

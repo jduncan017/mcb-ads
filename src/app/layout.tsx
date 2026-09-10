@@ -2,7 +2,7 @@ import "~/styles/globals.css";
 
 import { Suspense } from "react";
 import { type Metadata } from "next";
-import { bodyFont, headingFont, monoFont } from "~/fonts";
+import { bodyFont, headingFont } from "~/fonts";
 import { env } from "~/env";
 import { PostHogProvider } from "~/components/PostHogProvider";
 import { MetaPixel } from "~/components/MetaPixel";
@@ -36,10 +36,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${bodyFont.variable} ${headingFont.variable} ${monoFont.variable}`}
-    >
+    <html lang="en" className={`${bodyFont.variable} ${headingFont.variable}`}>
       <head>
         {metaVerification && (
           <meta

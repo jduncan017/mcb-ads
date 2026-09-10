@@ -35,7 +35,14 @@ export function Hero({
         {/* Copy */}
         <FadeIn className="flex flex-col items-start gap-6 md:shrink-0 lg:w-5/12">
           <Eyebrow className="hidden md:block">{tagline}</Eyebrow>
-          <h1 className="text-primary-300 capitalize">{heading}</h1>
+          {/*
+            primary-200 (#80c0ed), not 300. The brand blue (#3e88bd) is built
+            to sit BEHIND white text as a fill, so as large text on the dark
+            page background it reads muddy: ~5.0:1 contrast versus ~9.8:1 for
+            the lighter tone. 200 is the same blue the live site uses for its
+            own accent text, so this stays on brand while staying readable.
+          */}
+          <h1 className="text-primary-200 capitalize">{heading}</h1>
           <p className="max-w-xl text-neutral-200">{description}</p>
           <div className="mt-4 flex w-full max-w-[520px] flex-col gap-4 sm:w-auto sm:flex-row">
             {cta}

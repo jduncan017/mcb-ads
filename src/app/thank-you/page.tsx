@@ -46,11 +46,12 @@ export default function ThankYouPage() {
 
       // Fire the Google Ads conversion ONLY for real ad clicks.
       //
-      // The HoneyBook form's redirect is configured on the form itself, and the
-      // same form is embedded on the main website. Those submissions also land
-      // here, so firing unconditionally reported non-ad leads as ad conversions.
-      // Gating on a click id (gclid/gbraid/wbraid) keeps Google Ads reporting
-      // honest. Skips silently if either env var is missing.
+      // Historically the main website shared this form, so its submissions
+      // redirected here too and were reported as ad conversions. That form now
+      // has its own HoneyBook placement and no longer lands here, so the gate
+      // is no longer load-bearing for that case. It stays because it also stops
+      // an organic or direct visitor to /google or /staffing from being counted
+      // as a paid conversion. Skips silently if either env var is missing.
       const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
       const conversionLabel =
         process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
@@ -80,15 +81,26 @@ export default function ThankYouPage() {
         // non-fatal
       }
 
-      // Notify owner + n8n regardless of channel — the owner wants to know about
-      // EVERY lead, ad-driven or not. The payload labels which channel it came
-      // from. The lead's PII lives in HoneyBook (which sends its own notification).
+      // Notify owner + n8n for EVERY lead, ad-driven or not. The lead's PII
+      // lives in HoneyBook, which sends its own notification; this is the
+      // attribution half.
+      //
+      // Which form did they submit? HoneyBook sets the redirect per form, so
+      // placement 4 (staffing) and placement 5 (full service) can each tag
+      // themselves via ?service=. Falls back to the landing page server-side
+      // when the param is absent, so this works before the redirects are
+      // updated.
+      const service = new URLSearchParams(window.location.search).get(
+        "service",
+      );
+
       void fetch("/api/honeybook-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           attribution,
           pageUrl: window.location.href,
+          service,
         }),
         keepalive: true,
       }).catch(() => {
@@ -105,7 +117,7 @@ export default function ThankYouPage() {
   const eventDescriptor = describeEvent(prefill);
 
   return (
-    <main className="bg-neutral-400 flex min-h-screen items-center justify-center px-4 py-12 text-neutral-100">
+    <main className="flex min-h-screen items-center justify-center bg-neutral-400 px-4 py-12 text-neutral-100">
       <div className="relative mx-auto w-full max-w-[640px] overflow-hidden rounded-2xl border border-white/10 bg-[#122134] p-8 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] md:p-12">
         <div className="from-primary-300/20 absolute -top-32 -right-32 h-[300px] w-[300px] rounded-full bg-linear-to-br to-transparent blur-3xl" />
 
@@ -115,18 +127,18 @@ export default function ThankYouPage() {
           </div>
 
           <h1 className="font-heading mb-3 text-3xl tracking-wide md:text-4xl">
-            {firstName ? `You're booked, ${firstName}.` : "You're booked."}
+            {firstName ? `Got it, ${firstName}.` : "Request received."}
           </h1>
 
           <p className="mb-6 text-base text-neutral-200 md:text-lg">
             {eventDescriptor
-              ? `Your ${eventDescriptor} is on the calendar. Check your inbox for the confirmation.`
-              : "Your discovery call is on the calendar. Check your inbox for the confirmation."}
+              ? `We have your ${eventDescriptor} details and we'll be in touch within 24 hours with a quote.`
+              : "We have your event details. Expect a quote from us within 24 hours."}
           </p>
 
           <div className="border-primary-300/20 mb-8 rounded-xl border bg-white/[0.04] p-5 md:p-6">
             <p className="text-primary-100 mb-4 text-xs font-semibold tracking-[0.14em] uppercase">
-              What to expect
+              What happens next
             </p>
             <ol className="space-y-4 text-sm leading-relaxed text-neutral-100 md:text-base">
               <li className="flex gap-3">
@@ -134,8 +146,8 @@ export default function ThankYouPage() {
                   1
                 </span>
                 <span>
-                  A 10-minute call to talk through your event and design the
-                  right bar package.
+                  James reviews your event details personally. No call center,
+                  no automated triage.
                 </span>
               </li>
               <li className="flex gap-3">
@@ -143,8 +155,8 @@ export default function ThankYouPage() {
                   2
                 </span>
                 <span>
-                  We&apos;ll cover menu concepts, ingredients, pricing, and
-                  what&apos;s included.
+                  You&apos;ll get an email within 24 hours with a quote and
+                  availability for your date.
                 </span>
               </li>
               <li className="flex gap-3">
@@ -152,21 +164,31 @@ export default function ThankYouPage() {
                   3
                 </span>
                 <span>
-                  After the call, you&apos;ll get a custom quote within 24
-                  hours.
+                  If it&apos;s a fit, we&apos;ll set up a quick call to finalize
+                  the details.
                 </span>
               </li>
             </ol>
           </div>
 
           <p className="mb-6 text-sm text-neutral-300">
-            Quick prep: if you have specific cocktails in mind, a venue address,
-            or anything unusual about the setup (rooftop, outdoor, multiple
-            stations), jot it down. We&apos;ll talk through it on the call.
+            Worth having ready: your venue address, a rough guest count, and
+            anything unusual about the setup (rooftop, outdoor, multiple
+            stations). It helps us quote accurately the first time.
+          </p>
+          <p className="mb-6 text-sm text-neutral-300">
+            Nothing arrived within 24 hours? Check your spam folder, then email{" "}
+            <a
+              href="mailto:mobilecraftbars@gmail.com"
+              className="text-primary-200 hover:text-primary-100 underline transition"
+            >
+              mobilecraftbars@gmail.com
+            </a>{" "}
+            and we&apos;ll sort it out.
           </p>
 
           <Link
-            href="/general"
+            href="/google"
             className="text-primary-200 hover:text-primary-100 inline-flex items-center text-sm tracking-wide transition"
           >
             Back to home

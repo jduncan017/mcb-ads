@@ -63,7 +63,7 @@ export function Testimonials({
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="scrollbar-none flex snap-x snap-mandatory gap-4 overflow-x-auto"
+            className="flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto"
             style={{ scrollbarWidth: "none" }}
           >
             {testimonials.map((t) => (
@@ -131,7 +131,9 @@ function TestimonialCard({ testimonial: t }: { testimonial: Testimonial }) {
       padding="md"
       className="card-hover flex h-full flex-col border border-gray-400/30 bg-linear-to-br from-gray-200/20 to-gray-600/20"
     >
-      <p className="text-xl leading-relaxed font-light text-neutral-100">
+      {/* font-normal, not font-light: 300 was the only use of that weight in
+          the whole app and cost a separate font file to render one element. */}
+      <p className="text-xl leading-relaxed font-normal text-neutral-100">
         &ldquo;{t.quote}&rdquo;
       </p>
       <div className="mt-auto flex items-center gap-3 pt-8">

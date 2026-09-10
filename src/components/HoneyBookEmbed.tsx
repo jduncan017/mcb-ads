@@ -26,7 +26,19 @@ import { analytics } from "~/lib/analytics";
  * injected iframe doesn't cause layout shift (CLS).
  */
 
-const HB_PID = "697d2a1284c5890030c7012e";
+/**
+ * HoneyBook account id. One PID covers the whole account; individual forms are
+ * distinguished by the PLACEMENT INDEX in the container class
+ * (`hb-p-<pid>-<placement>`), not by a separate pid. So a second form is the
+ * same pid with a different index — see the `placement` prop.
+ *
+ * Placement 1 is the shared contact form, which is also embedded on
+ * www.mobilecraftbars.com. Its post-submit redirect is configured on the FORM,
+ * not per-embed, which is why main-site submissions also land on our
+ * /thank-you page.
+ */
+const DEFAULT_HB_PID = "697d2a1284c5890030c7012e";
+const DEFAULT_PLACEMENT = 1;
 const HB_SRC =
   "https://widget.honeybook.com/assets_users_production/websiteplacements/placement-controller.min.js";
 
@@ -34,13 +46,13 @@ const HB_SRC =
 // shove the page (kills the CLS contribution from the embed).
 const RESERVED_MIN_HEIGHT = 640;
 
-function injectHoneyBook() {
+function injectHoneyBook(pid: string) {
   if (typeof window === "undefined") return;
   const w = window as unknown as { _HB_?: { pid: string } };
   // Guard against double-injection (React strict mode, remounts).
   if (document.getElementById("honeybook-placement-loader")) return;
-  w._HB_ = w._HB_ ?? { pid: HB_PID };
-  w._HB_.pid = HB_PID;
+  w._HB_ = w._HB_ ?? { pid };
+  w._HB_.pid = pid;
   const s = document.createElement("script");
   s.id = "honeybook-placement-loader";
   s.type = "text/javascript";
@@ -54,7 +66,21 @@ function injectHoneyBook() {
   }
 }
 
-export function HoneyBookEmbed() {
+interface HoneyBookEmbedProps {
+  /** HoneyBook account id. Same for every form on the account. */
+  pid?: string;
+  /**
+   * Which form on the account to render. Taken from the trailing number in
+   * HoneyBook's embed snippet: `<div class="hb-p-<pid>-4">` is placement 4.
+   * Defaults to 1, the shared contact form.
+   */
+  placement?: number;
+}
+
+export function HoneyBookEmbed({
+  pid = DEFAULT_HB_PID,
+  placement = DEFAULT_PLACEMENT,
+}: HoneyBookEmbedProps) {
   const placementRef = useRef<HTMLDivElement>(null);
   const [loadTriggered, setLoadTriggered] = useState(false);
 
@@ -69,7 +95,7 @@ export function HoneyBookEmbed() {
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
           setLoadTriggered(true);
-          injectHoneyBook();
+          injectHoneyBook(pid);
           loader.disconnect();
         }
       },
@@ -77,7 +103,7 @@ export function HoneyBookEmbed() {
     );
     loader.observe(el);
     return () => loader.disconnect();
-  }, [loadTriggered]);
+  }, [loadTriggered, pid]);
 
   // Instrumentation around the cross-origin iframe blind spot:
   // - honeybook_embed_loaded: the controller injected the form (iframe appeared).
@@ -125,7 +151,7 @@ export function HoneyBookEmbed() {
     <>
       <div
         ref={placementRef}
-        className={`hb-p-${HB_PID}-1`}
+        className={`hb-p-${pid}-${placement}`}
         style={{ minHeight: RESERVED_MIN_HEIGHT }}
       />
       {/* HoneyBook placement-analytics pixel. Deferred with the widget so it
@@ -136,7 +162,7 @@ export function HoneyBookEmbed() {
           height="1"
           width="1"
           style={{ display: "none" }}
-          src={`https://www.honeybook.com/p.png?pid=${HB_PID}`}
+          src={`https://www.honeybook.com/p.png?pid=${pid}`}
           alt=""
         />
       )}

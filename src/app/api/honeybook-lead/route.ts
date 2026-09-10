@@ -64,6 +64,8 @@ interface Attribution {
 interface HoneyBookLeadPayload {
   attribution?: Attribution | null;
   pageUrl?: string;
+  /** `?service=` from the HoneyBook redirect. "staffing" | "full" | null. */
+  service?: string | null;
 }
 
 export async function POST(request: NextRequest) {
@@ -109,7 +111,11 @@ export async function POST(request: NextRequest) {
   // alert's job is "a lead just landed, here's where it came from, go look."
   const n8nUrl = env.N8N_BOOKING_WEBHOOK_URL;
   if (n8nUrl) {
-    const body = buildLeadNotification(attribution, payload.pageUrl);
+    const body = buildLeadNotification(
+      attribution,
+      payload.pageUrl,
+      payload.service,
+    );
     after(async () => {
       try {
         const res = await fetch(n8nUrl, {
@@ -140,6 +146,31 @@ function display(value: string | undefined): string {
 }
 
 /**
+ * Which offer did this lead come in on? The two funnel pages sell different
+ * things and the owner's next move differs: staffing is hours x rate, full
+ * service is designing a package. Prefers the explicit `?service=` tag on the
+ * HoneyBook redirect; falls back to the landing page so this still works if a
+ * redirect hasn't been tagged yet.
+ */
+function resolveService(
+  service: string | null | undefined,
+  landingUrl: string | undefined,
+): { key: "staffing" | "full" | "unknown"; label: string } {
+  const tag = service?.trim().toLowerCase();
+  if (tag === "staffing") return { key: "staffing", label: "Staffing only" };
+  if (tag === "full") return { key: "full", label: "Full bar service" };
+
+  const path = landingUrl?.toLowerCase() ?? "";
+  if (path.includes("/staffing")) {
+    return { key: "staffing", label: "Staffing only (inferred from page)" };
+  }
+  if (path.includes("/google")) {
+    return { key: "full", label: "Full bar service (inferred from page)" };
+  }
+  return { key: "unknown", label: NOT_PROVIDED };
+}
+
+/**
  * Build the flat, always-populated lead notification payload for n8n/Slack.
  *
  * Design rules:
@@ -147,54 +178,65 @@ function display(value: string | undefined): string {
  * - No undefined/empty values. Anything unknown becomes "Not provided".
  * - Includes a ready-to-post `summary` line so a Slack node can be wired to a
  *   single field and still produce a useful message.
+ *
+ * NOTE: the "came from the main website" case is gone. The main site's contact
+ * form was split onto its own HoneyBook placement and no longer redirects here,
+ * so every lead reaching this endpoint came through the ad funnel. What varies
+ * now is WHICH funnel page — staffing or full service.
  */
 function buildLeadNotification(
   attribution: Attribution | undefined,
   pageUrl: string | undefined,
+  service: string | null | undefined,
 ) {
   const now = new Date();
 
-  const gclid = attribution?.gclid ?? attribution?.gbraid ?? attribution?.wbraid;
+  const gclid =
+    attribution?.gclid ?? attribution?.gbraid ?? attribution?.wbraid;
   const isGoogleAds = Boolean(gclid);
   const isMeta = Boolean(attribution?.fbclid);
 
-  // Did this visitor come through OUR ad funnel at all? The HoneyBook form is
-  // also embedded on the main website (www.mobilecraftbars.com/contact) and its
-  // post-submit redirect points here regardless of where it was filled in, so a
-  // lead with no ad click and no funnel landing page came from somewhere else.
-  const cameThroughFunnel = Boolean(attribution?.landingUrl);
+  const { key: serviceKey, label: serviceType } = resolveService(
+    service,
+    attribution?.landingUrl,
+  );
 
   // Human-readable channel. utm_source is the fallback when there's no click id.
   let leadSource: string;
   if (isGoogleAds) leadSource = "Google Ads";
   else if (isMeta) leadSource = "Meta Ads";
   else if (attribution?.source) leadSource = attribution.source;
-  else if (cameThroughFunnel) leadSource = "Direct / organic (ad funnel page)";
-  else leadSource = "Main website or direct HoneyBook link";
+  else leadSource = "Direct / organic";
 
   const keyword = display(attribution?.term);
   const campaign = display(attribution?.campaign);
 
-  // One-line message a Slack node can post as-is. Says plainly which channel
-  // produced the lead so an off-funnel lead reads as information, not a failure.
+  // One-line message a Slack node can post as-is. Leads with the offer type,
+  // because that's what decides how the owner replies.
+  const offer =
+    serviceKey === "staffing"
+      ? "Staffing enquiry"
+      : serviceKey === "full"
+        ? "Full bar service enquiry"
+        : "New enquiry";
+
   let summary: string;
   if (isGoogleAds) {
     const kw = keyword !== NOT_PROVIDED ? ` (keyword: ${keyword})` : "";
-    summary = `New lead from Google Ads${kw}. Full details in HoneyBook.`;
+    summary = `${offer} from Google Ads${kw}. Full details in HoneyBook.`;
   } else if (isMeta) {
-    summary = `New lead from Meta Ads. Full details in HoneyBook.`;
-  } else if (cameThroughFunnel) {
-    summary = `New lead from the ad landing page, but with no ad click recorded (direct or organic visit). Full details in HoneyBook.`;
+    summary = `${offer} from Meta Ads. Full details in HoneyBook.`;
   } else {
-    summary = `New lead, not from the ad funnel. Most likely the main website contact form or a direct HoneyBook link. Full details in HoneyBook.`;
+    summary = `${offer} from a direct or organic visit, no ad click recorded. Full details in HoneyBook.`;
   }
 
   return {
     event: "honeybook_lead",
     summary,
+    serviceType,
     leadSource,
     isGoogleAds,
-    cameThroughFunnel,
+    isStaffing: serviceKey === "staffing",
     // True only for a billable ad click. Drives whether the Google Ads
     // conversion fired on /thank-you, so Slack and Google agree.
     attributed: isGoogleAds || isMeta,
@@ -212,7 +254,10 @@ function buildLeadNotification(
       timeStyle: "short",
     }),
     pageUrl: display(pageUrl),
-    nextStep: "Open HoneyBook to see the lead's name, email, and event details.",
+    nextStep:
+      serviceKey === "staffing"
+        ? "Open HoneyBook for the lead's details, then quote hours x rate ($100/hr bartender, $60/hr support, 3 hr min)."
+        : "Open HoneyBook to see the lead's name, email, and event details.",
   };
 }
 
