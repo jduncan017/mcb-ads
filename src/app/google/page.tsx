@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   Heart,
   Briefcase,
@@ -35,6 +36,9 @@ import { Hero, Testimonials } from "~/components/sections";
  *   pricing as sticker shock before they've seen the value.
  * - Copy speaks to "hire bartenders in Denver" intent, not "imagine your
  *   event" inspiration.
+ * - A "just need bartenders?" link above the form routes staffing-only
+ *   visitors to /staffing (no longer ad-driven) so they don't fill in the
+ *   full-service form. Mirrors the staffing-to-full-service link there.
  */
 
 const siteName = "Mobile Craft Bars";
@@ -189,6 +193,16 @@ export default function GoogleLandingPage() {
             <h2 className="text-2xl md:text-3xl">
               Tell us your date, get a quote in 24 hours
             </h2>
+            <p className="mt-4 text-sm text-neutral-200">
+              Just need bartenders, not the full bar?{" "}
+              <Link
+                href="/staffing"
+                className="text-primary-200 hover:text-primary-100 font-semibold tracking-wide transition"
+                data-ph-capture-attribute-button-text="full-service-to-staffing"
+              >
+                See hourly staffing rates →
+              </Link>
+            </p>
           </div>
         </FadeIn>
 
@@ -276,7 +290,7 @@ export default function GoogleLandingPage() {
       </section>
 
       {/* Who we serve / what you get */}
-      <section className="section-pad">
+      <section className="section-pad scroll-mt-24" id="packages">
         <div className="mx-auto max-w-[1100px]">
           <FadeIn>
             <div className="mx-auto mb-10 max-w-[720px] text-center md:mb-14">
@@ -334,18 +348,20 @@ export default function GoogleLandingPage() {
       </section>
 
       {/* Testimonials */}
-      <Testimonials
-        eyebrow="What Clients Say"
-        heading="They're still talking about the drinks"
-        testimonials={testimonials}
-      />
+      <div className="scroll-mt-24" id="reviews">
+        <Testimonials
+          eyebrow="What Clients Say"
+          heading="They're still talking about the drinks"
+          testimonials={testimonials}
+        />
+      </div>
 
       {/* Final CTA — scrolls back up to the form */}
       <section className="relative overflow-hidden px-6 py-20 md:py-28">
         <div className="gradient-orb bg-primary-300 top-0 -left-32 h-[400px] w-[400px]" />
         <div className="gradient-orb bg-secondary-300 -right-32 bottom-0 h-[300px] w-[300px]" />
         <div className="relative mx-auto max-w-[720px] text-center">
-          <h2 className="mb-4">Dates Book Up Fast in Summer</h2>
+          <h2 className="mb-4">Dates Book Up Fast!</h2>
           <p className="mb-8 text-neutral-200">
             Check availability for your date. Quote within 24 hours, no
             obligation.
